@@ -1,3 +1,255 @@
+
+Claude finished the response
+You said: Zbuduj dashboard pokazujacy scatterplot danych z zalaczonego pliku i pozwól mi wyznaczyć na nim 50, 85 i 95 percentyl czasow realizacji.
+
+Lead Times - 2024-25.xlsx
+xlsx
+
+Zbuduj dashboard pokazujacy scatterplot danych z zalaczonego pliku i pozwól mi wyznaczyć  na nim 50, 85 i 95 percentyl czasow realizacji. Pokaz w postaci innego koloru elementy z rozmiarami s,m,l. Styl ciemny. Wygeneruj plik do osadzenia na stronie
+
+13:38
+Claude responded: Mam wszystkie dane.
+
+Ran 3 commands, viewed a file
+Ran 3 commands, viewed a file
+Mam wszystkie dane. Teraz buduję dashboard HTML z interaktywnym scatterplotem.
+
+
+Created a file, read a file
+Created a file, read a file
+Dashboard gotowy! Oto co zawiera:
+
+Scatterplot — 36 zadań rozłożonych na osi czasu (lip 2024 – gru 2025), każdy punkt to jedno zadanie.
+
+Kolory rozmiarów:
+
+🔵 Niebieski — Small (S)
+🟢 Zielony — Medium (M)
+🟠 Pomarańczowy — Large (L)
+Percentyle — przełączaj przyciskami P50 / P85 / P95:
+
+P50 = 88 dni (złoty)
+P85 = 145 dni (pomarańczowy)
+P95 = 302 dni (czerwony)
+Każdy aktywny percentyl pokazuje przerywaną linię na wykresie + informację ile % zadań mieści się poniżej. Możesz też filtrować rozmiary klikając w legendę. Plik HTML jest samodzielny — gotowy do osadzenia na stronie.
+
+
+Lead times dashboard
+Code · HTML 
+You said: Chcialabym aby kolory kropek (zadań) byly spójne z kolorami legendy w okienkach
+Chcialabym aby kolory kropek (zadań) byly spójne z kolorami legendy w okienkach
+
+13:42
+Claude responded: Masz rację — kolory w stat cardach są hardcoded.
+Masz rację — kolory w stat cardach są hardcoded. Poprawiam to teraz.
+
+
+Viewed 2 files
+Viewed 2 files
+Rozumiem — chodzi o to, żeby stat cardy dla S/M/L (liczba zadań per rozmiar) używały tych samych kolorów co kropki na wykresie. Przebuduję sekcję statystyk.
+
+
+Edited a file, read a file
+Edited a file, read a file
+Gotowe! Teraz stat cardy są w pełni spójne z wykresem:
+
+🔵 Small — niebieski (karta + kropka + legenda)
+🟢 Medium — zielony
+🟠 Large — pomarańczowy
+Cardy percentyli mają ten sam kolor co przyciski P50/P85/P95 i linie na wykresie
+Każda karta ma też kolorowy akcent w obramowaniu i ikonkę (kółko dla rozmiarów, kreska dla percentyli) dla lepszej czytelności.
+
+
+Lead times dashboard
+Code · HTML 
+You said: Zaznacz mi percentyle 50, 85, 95 na odcienie koloru czerwonego.
+Zaznacz mi percentyle 50, 85, 95 na odcienie koloru czerwonego. A Smal , medium, large daj small kolor fioletowy, medium niebieski i large zielony
+
+13:45
+Claude responded: Gotowe!
+
+Edited 4 files, viewed 2 files, read a file
+Edited 4 files, viewed 2 files, read a file
+Gotowe! Nowe kolory:
+
+🟣 Small — fioletowy 
+#a371f7
+🔵 Medium — niebieski 
+#58a6ff
+🟢 Large — zielony 
+#3fb950
+🔴 P50 — jasny czerwony 
+#ff6b6b
+🔴 P85 — średni czerwony 
+#e03c3c
+🔴 P95 — ciemna czerwień 
+#a00000
+Wszystkie kolory spójne we wszystkich elementach — kropki, legenda, karty statystyk, przyciski i linie percentylowe.
+
+
+Lead times dashboard
+Code · HTML 
+You said: i zmien na tryb jasny
+i zmien na tryb jasny
+
+13:46
+Claude responded: Mam pełny obraz wszystkich kolorów.
+
+Viewed 3 files
+Viewed 3 files
+Mam pełny obraz wszystkich kolorów. Teraz zamieniam wszystko na tryb jasny.
+
+
+Edited 11 files, read a file
+Edited 11 files, read a file
+Gotowe! Dashboard w trybie jasnym — białe karty i wykres na jasnoszarym tle, wszystkie kolory kropek, percentyli i etykiet dostosowane do jasnego tła.
+
+
+Lead times dashboard
+Code · HTML 
+You said: Dlda
+Dlda
+
+14:14
+Claude responded: Czy masz na myśli coś konkretnego?
+Czy masz na myśli coś konkretnego? Wygląda jakby wiadomość została ucięta — napisz co chciałaś dodać lub zmienić w dashboardzie 😊
+
+You said: Sorki, poprawka , Dodaj mi do dashboarda funkcje usuwania ręcznie punktów danych.
+Sorki, poprawka , Dodaj mi do dashboarda funkcje usuwania ręcznie punktów danych. Chcialabym aby ta funkcja byla dostepna kiedy najade na dana kropke z zadaniem, dana ktora chce usunac i zaznacze ja i bedzie wtedy mozliwosc wyboru usuniecia.
+
+14:16
+Claude responded: Mam pełny obraz.
+
+Viewed 3 files
+Viewed 3 files
+Mam pełny obraz. Przebuduję interakcję z kropkami — kliknięcie zaznaczy punkt, pojawi się popup z opcją usunięcia, a percentyle i statystyki przeliczą się na żywo.
+
+
+Edited 2 files
+Edited 2 files
+Now replace the entire dots + interaction block with the new delete-capable version:
+
+
+Replace dot interaction with click-to-select + delete popup logic
+Replace dot interaction with click-to-select + delete popup logic
+Now replace updateDots and add activeData + rebuildChart:
+
+
+Replace updateDots with rebuildChart that recalculates percentiles and stats
+Replace updateDots with rebuildChart that recalculates percentiles and stats
+Now fix updatePercentileInfo to use activeData instead of data:
+
+
+Edited a file, read a file
+Edited a file, read a file
+Gotowe! Oto jak działa nowa funkcja:
+
+Najedź na kropkę — tooltip pokazuje dane i podpowiedź "Kliknij aby zaznaczyć"
+Kliknij — kropka się zaznacza (większa, z cieniem), pojawia się popup z datą i opcją usunięcia
+Usuń punkt — punkt znika, a percentyle i statystyki przeliczają się na żywo
+Cofnij — przez 6 sekund wyświetla się pasek z możliwością przywrócenia usuniętego punktu
+
+Lead times dashboard
+Code · HTML 
+You said: a co sie stalo , ze zniknely moje dane, kropki?
+a co sie stalo , ze zniknely moje dane, kropki?
+
+14:17
+Claude responded: Przepraszam!
+Przepraszam! Problem leży w kolejności kodu — activeData jest deklarowane po renderDots(). Naprawiam to.
+
+
+Viewed 2 files
+Viewed 2 files
+Widzę problem — activeData jest zadeklarowane po renderDots(). Przestawiam kolejność.
+
+
+Edited a file, read a file
+Edited a file, read a file
+Gotowe! Błąd był prosty — activeData było inicjalizowane po wywołaniu renderDots(), więc tablica była pusta. Teraz kropki powinny być widoczne i funkcja usuwania działa poprawnie.
+
+
+Lead times dashboard
+Code · HTML 
+You said: Dodaj jeszcze funkcje przywrocenia kropki - tej danej z powrotem, cofniecia akcji w prawym gornym rogu
+Dodaj jeszcze funkcje przywrocenia kropki - tej danej z powrotem, cofniecia akcji w prawym gornym rogu
+
+14:27
+Claude responded: Now update the JS — replace the delete/undo logic to use a full history stack: Now update the delete button handler to push to history instead of lastDeleted: …
+
+Viewed 2 files, edited 2 files
+Viewed 2 files, edited 2 files
+Now update the JS — replace the delete/undo logic to use a full history stack:
+
+
+Replace undo logic with full history stack and panel
+Replace undo logic with full history stack and panel
+Now update the delete button handler to push to history instead of lastDeleted:
+
+
+Update delete handler to push to history stack
+Update delete handler to push to history stack
+Remove the old undo button handler:
+
+
+Remove old undo button handler
+Remove old undo button handler
+Remove old undo bar HTML and unused variable references:
+
+
+Edited 2 files, read a file
+Edited 2 files, read a file
+Gotowe! W prawym górnym rogu pojawił się przycisk ↩ Przywróć z czerwoną liczbą usuniętych punktów. Po kliknięciu otwiera się panel z listą wszystkich usuniętych zadań — każde można przywrócić osobno lub wszystkie naraz przyciskiem na dole. Percentyle i statystyki przeliczają się automatycznie po każdym przywróceniu.
+
+
+Lead times dashboard
+Code · HTML 
+You said: Dodaj teraz prosze funkcje filtrowania danych po dacie; daj mi opcje filtrowania danych : rok, miesiąc , dzien oraz mozliwosc dodania wlasnego zakresu danych d…
+Dodaj teraz prosze funkcje filtrowania danych po dacie; daj mi opcje filtrowania danych : rok, miesiąc , dzien oraz mozliwosc dodania wlasnego zakresu danych do wyswietlenia. Chcialabym by filtr dzialal intuicyjnie i byla to opcja rozwijalna i pole do wpisania swojego zakresu . Ma byc to umieszczone za rozmiar
+
+14:39
+Claude responded: Mam pełny obraz.
+
+Viewed 2 files
+Viewed 2 files
+Mam pełny obraz. Dodaję filtr daty po sekcji "Rozmiar".
+
+
+Edited 2 files
+Edited 2 files
+Now add the date filter JS logic. Let me find the right place to insert it:
+
+
+Viewed 2 files, edited a file
+Viewed 2 files, edited a file
+Now I need to update rebuildChart to use filtered data for rendering, and add rebuildActiveData. Let me find it:
+
+
+Viewed 2 files, edited a file
+Viewed 2 files, edited a file
+Also fix updatePercentileInfo to use filtered data:
+
+
+Edited a file, read a file
+Edited a file, read a file
+Gotowe! Filtr daty pojawił się za "Rozmiar" i działa tak:
+
+Rok — kliknij chip 2024 lub 2025, żeby pokazać tylko dany rok
+Miesiąc — kliknij dowolny miesiąc, żeby zobaczyć wszystkie zadania z tego miesiąca (niezależnie od roku)
+Własny zakres — wpisz daty od/do i kliknij "Zastosuj zakres"
+Wyczyść filtr — przywraca widok wszystkich danych
+Przycisk filtra zmienia kolor na niebieski gdy jest aktywny i pokazuje wybrany zakres. Percentyle i statystyki przeliczają się automatycznie do widocznych punktów.
+
+
+Lead times dashboard
+Code · HTML 
+
+
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
 Lead times dashboard · HTML
 Copy
 
@@ -416,6 +668,133 @@ Copy
   .history-clear-btn:hover { background: #fee2e2; }
  
   .header-right { position: relative; }
+ 
+  /* Date filter */
+  .date-filter-wrap { position: relative; }
+ 
+  .date-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+ 
+  .date-filter-btn:hover { background: #f9fafb; border-color: #d1d5db; }
+  .date-filter-btn.active { border-color: #6366f1; color: #4f46e5; background: #eef2ff; }
+ 
+  .date-filter-arrow { font-size: 0.6rem; color: #9ca3af; transition: transform 0.15s; }
+  .date-filter-btn.open .date-filter-arrow { transform: rotate(180deg); }
+ 
+  .date-filter-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    width: 300px;
+    z-index: 50;
+    display: none;
+    padding: 14px;
+  }
+ 
+  .date-filter-panel.visible { display: block; }
+ 
+  .df-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    margin-top: 12px;
+  }
+ 
+  .df-section-title:first-child { margin-top: 0; }
+ 
+  .df-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+ 
+  .df-chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+ 
+  .df-chip:hover { border-color: #6366f1; color: #4f46e5; }
+  .df-chip.active { background: #eef2ff; border-color: #6366f1; color: #4f46e5; font-weight: 700; }
+ 
+  .df-range {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+  }
+ 
+  .df-range input[type="date"] {
+    flex: 1;
+    padding: 5px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: #374151;
+    outline: none;
+    transition: border-color 0.12s;
+  }
+ 
+  .df-range input[type="date"]:focus { border-color: #6366f1; }
+  .df-range-sep { font-size: 0.75rem; color: #9ca3af; }
+ 
+  .df-apply-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 7px;
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+ 
+  .df-apply-btn:hover { background: #4338ca; }
+ 
+  .df-reset-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 6px;
+    background: transparent;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+ 
+  .df-reset-btn:hover { background: #f9fafb; color: #374151; }
 </style>
 </head>
 <body>
@@ -452,6 +831,27 @@ Copy
     <div class="control-group">
       <span class="control-label">Rozmiar:</span>
       <div class="size-legend" id="sizeLegend"></div>
+    </div>
+    <div class="control-group date-filter-wrap" id="dateFilterWrap">
+      <span class="control-label">Data:</span>
+      <button class="date-filter-btn" id="dateFilterBtn">
+        <span id="dateFilterLabel">Wszystkie</span>
+        <span class="date-filter-arrow">▼</span>
+      </button>
+      <div class="date-filter-panel" id="dateFilterPanel">
+        <div class="df-section-title">Rok</div>
+        <div class="df-chips" id="dfYearChips"></div>
+        <div class="df-section-title">Miesiąc</div>
+        <div class="df-chips" id="dfMonthChips"></div>
+        <div class="df-section-title">Własny zakres</div>
+        <div class="df-range">
+          <input type="date" id="dfFrom" />
+          <span class="df-range-sep">→</span>
+          <input type="date" id="dfTo" />
+        </div>
+        <button class="df-apply-btn" id="dfApplyBtn">Zastosuj zakres</button>
+        <button class="df-reset-btn" id="dfResetBtn">✕ Wyczyść filtr</button>
+      </div>
     </div>
   </div>
  
@@ -554,6 +954,146 @@ statsRow.innerHTML += `<div class="stat-card">
 // Size filter state
 const sizeVisible = { S: true, M: true, L: true };
 const activePercentiles = { 50: false, 85: false, 95: false };
+ 
+// Date filter state
+let dateFilter = { type: null, year: null, month: null, from: null, to: null };
+ 
+const MONTH_NAMES_PL = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+ 
+// Build year/month chips from data
+const allYears = [...new Set(data.map(d => d.date.getFullYear()))].sort();
+const allMonths = [...new Set(data.map(d => d.date.getMonth()))].sort((a,b)=>a-b);
+ 
+const dfYearChips = document.getElementById('dfYearChips');
+const dfMonthChips = document.getElementById('dfMonthChips');
+const dateFilterBtn = document.getElementById('dateFilterBtn');
+const dateFilterLabel = document.getElementById('dateFilterLabel');
+const dateFilterPanel = document.getElementById('dateFilterPanel');
+const dfFrom = document.getElementById('dfFrom');
+const dfTo = document.getElementById('dfTo');
+const dfApplyBtn = document.getElementById('dfApplyBtn');
+const dfResetBtn = document.getElementById('dfResetBtn');
+ 
+allYears.forEach(yr => {
+  const chip = document.createElement('div');
+  chip.className = 'df-chip';
+  chip.textContent = yr;
+  chip.dataset.year = yr;
+  chip.addEventListener('click', () => {
+    // Toggle year
+    if (dateFilter.type === 'year' && dateFilter.year === yr) {
+      resetDateFilter();
+    } else {
+      dateFilter = { type: 'year', year: yr, month: null, from: null, to: null };
+      dfFrom.value = ''; dfTo.value = '';
+      clearChipActive(dfMonthChips);
+      updateChipActive(dfYearChips, chip);
+      applyDateFilter();
+    }
+  });
+  dfYearChips.appendChild(chip);
+});
+ 
+allMonths.forEach(m => {
+  const chip = document.createElement('div');
+  chip.className = 'df-chip';
+  chip.textContent = MONTH_NAMES_PL[m];
+  chip.dataset.month = m;
+  chip.addEventListener('click', () => {
+    if (dateFilter.type === 'month' && dateFilter.month === m) {
+      resetDateFilter();
+    } else {
+      dateFilter = { type: 'month', year: null, month: m, from: null, to: null };
+      dfFrom.value = ''; dfTo.value = '';
+      clearChipActive(dfYearChips);
+      updateChipActive(dfMonthChips, chip);
+      applyDateFilter();
+    }
+  });
+  dfMonthChips.appendChild(chip);
+});
+ 
+dfApplyBtn.addEventListener('click', () => {
+  const from = dfFrom.value ? new Date(dfFrom.value) : null;
+  const to = dfTo.value ? new Date(dfTo.value + 'T23:59:59') : null;
+  if (!from && !to) return;
+  dateFilter = { type: 'range', year: null, month: null, from, to };
+  clearChipActive(dfYearChips);
+  clearChipActive(dfMonthChips);
+  applyDateFilter();
+});
+ 
+dfResetBtn.addEventListener('click', () => {
+  resetDateFilter();
+});
+ 
+function clearChipActive(container) {
+  container.querySelectorAll('.df-chip').forEach(c => c.classList.remove('active'));
+}
+ 
+function updateChipActive(container, activeChip) {
+  clearChipActive(container);
+  activeChip.classList.add('active');
+}
+ 
+function resetDateFilter() {
+  dateFilter = { type: null, year: null, month: null, from: null, to: null };
+  dfFrom.value = ''; dfTo.value = '';
+  clearChipActive(dfYearChips);
+  clearChipActive(dfMonthChips);
+  dateFilterBtn.classList.remove('active');
+  dateFilterLabel.textContent = 'Wszystkie';
+  applyDateFilter();
+}
+ 
+function applyDateFilter() {
+  dateFilterPanel.classList.remove('visible');
+  dateFilterBtn.classList.remove('open');
+  // Update button label
+  if (dateFilter.type === 'year') {
+    dateFilterLabel.textContent = dateFilter.year;
+    dateFilterBtn.classList.add('active');
+  } else if (dateFilter.type === 'month') {
+    dateFilterLabel.textContent = MONTH_NAMES_PL[dateFilter.month];
+    dateFilterBtn.classList.add('active');
+  } else if (dateFilter.type === 'range') {
+    const fmt = d => d ? d.toLocaleDateString('pl-PL', {day:'2-digit',month:'2-digit',year:'numeric'}) : '?';
+    dateFilterLabel.textContent = `${fmt(dateFilter.from)} – ${fmt(dateFilter.to)}`;
+    dateFilterBtn.classList.add('active');
+  } else {
+    dateFilterBtn.classList.remove('active');
+    dateFilterLabel.textContent = 'Wszystkie';
+  }
+  rebuildActiveData();
+}
+ 
+function getFilteredData() {
+  return activeData.filter(d => {
+    if (dateFilter.type === 'year') return d.date.getFullYear() === dateFilter.year;
+    if (dateFilter.type === 'month') return d.date.getMonth() === dateFilter.month;
+    if (dateFilter.type === 'range') {
+      if (dateFilter.from && d.date < dateFilter.from) return false;
+      if (dateFilter.to && d.date > dateFilter.to) return false;
+      return true;
+    }
+    return true;
+  });
+}
+ 
+// Toggle panel open/close
+dateFilterBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const isOpen = dateFilterPanel.classList.toggle('visible');
+  dateFilterBtn.classList.toggle('open', isOpen);
+});
+ 
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('dateFilterWrap');
+  if (!wrap.contains(e.target)) {
+    dateFilterPanel.classList.remove('visible');
+    dateFilterBtn.classList.remove('open');
+  }
+});
  
 // Legend
 const legend = document.getElementById('sizeLegend');
@@ -755,9 +1295,10 @@ dpDeleteBtn.addEventListener('click', () => {
  
  
 function renderDots() {
+  const filteredData = getFilteredData();
   g.selectAll('circle.dot').remove();
   g.selectAll('circle.dot')
-    .data(activeData)
+    .data(filteredData)
     .enter().append('circle')
     .attr('class', 'dot')
     .attr('cx', d => xScale(d.date))
@@ -787,22 +1328,18 @@ function renderDots() {
     .on('click', function(event, d) {
       event.stopPropagation();
       tooltip.style.opacity = '0';
-      // Deselect previous
       if (selectedDot) {
         selectedDot.classed('dot-selected', false);
         selectedDot.transition().duration(80).attr('r', 7).attr('fill-opacity', 0.85);
       }
       if (selectedData === d) { selectedDot = null; selectedData = null; deletePopup.classList.remove('visible'); return; }
-      // Select new
       selectedDot = d3.select(this);
       selectedData = d;
       selectedDot.classed('dot-selected', true).transition().duration(80).attr('r', 11).attr('fill-opacity', 1);
-      // Position popup
       const cx = +selectedDot.attr('cx');
       const cy = +selectedDot.attr('cy');
       let px = margin.left + cx + 16;
       let py = margin.top + cy - 20;
-      // Keep inside chart
       if (px + 180 > W) px = margin.left + cx - 195;
       deletePopup.style.left = px + 'px';
       deletePopup.style.top = py + 'px';
@@ -811,7 +1348,6 @@ function renderDots() {
       deletePopup.classList.add('visible');
     });
  
-  // Reapply size filter
   g.selectAll('circle.dot').attr('opacity', d => sizeVisible[d.size] ? 1 : 0.08);
 }
  
@@ -820,23 +1356,23 @@ let activeData = [...data];
  
 renderDots();
  
+// Rebuild after delete/restore (keeps date filter applied)
 function rebuildChart() {
-  const lts = activeData.map(d => d.lt);
+  const viewData = getFilteredData();
+  const lts = viewData.map(d => d.lt);
  
-  // Recalc percentiles
   P[50] = lts.length ? percentile(lts, 50) : 0;
   P[85] = lts.length ? percentile(lts, 85) : 0;
   P[95] = lts.length ? percentile(lts, 95) : 0;
  
-  // Rebuild stats row
   const statsRow = document.getElementById('statsRow');
   statsRow.innerHTML = '';
   statsRow.innerHTML += `<div class="stat-card">
-    <div class="stat-label">Wszystkie</div>
-    <div class="stat-value" style="color:#111827">${activeData.length}</div>
+    <div class="stat-label">Widoczne</div>
+    <div class="stat-value" style="color:#111827">${viewData.length}</div>
   </div>`;
   ['S','M','L'].forEach(sz => {
-    const count = activeData.filter(d => d.size === sz).length;
+    const count = viewData.filter(d => d.size === sz).length;
     statsRow.innerHTML += `<div class="stat-card" style="border-color:${COLORS[sz]}33">
       <div class="stat-label" style="display:flex;align-items:center;gap:6px">
         <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${COLORS[sz]}"></span>
@@ -858,6 +1394,11 @@ function rebuildChart() {
   renderDots();
   updatePercentileLines();
   updatePercentileInfo();
+}
+ 
+// Called when date filter changes
+function rebuildActiveData() {
+  rebuildChart();
 }
  
 function updateDots() {
@@ -904,7 +1445,7 @@ function updatePercentileInfo() {
   pinfoEl.innerHTML = '';
   [50, 85, 95].forEach(p => {
     if (!activePercentiles[p]) return;
-    const pct = activeData.filter(d => d.lt <= P[p]).length / (activeData.length || 1) * 100;
+    const pct = getFilteredData().filter(d => d.lt <= P[p]).length / (getFilteredData().length || 1) * 100;
     pinfoEl.innerHTML += `<div class="pinfo visible">
       <div class="pinfo-line" style="background:${PCOLORS[p]}"></div>
       <span>P${p}: <span class="pinfo-val">${Math.round(P[p])} dni</span> — ${Math.round(pct)}% zadań ukończonych w tym czasie</span>
