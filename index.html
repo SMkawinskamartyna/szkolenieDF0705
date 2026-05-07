@@ -305,6 +305,117 @@ Copy
     cursor: pointer;
     margin-left: auto;
   }
+ 
+  .history-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    transition: all 0.15s;
+  }
+ 
+  .history-btn:hover { background: #f9fafb; border-color: #d1d5db; }
+  .history-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+ 
+  .history-badge {
+    background: #dc2626;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    display: none;
+  }
+ 
+  .history-badge.visible { display: inline-block; }
+ 
+  /* History dropdown */
+  .history-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    min-width: 240px;
+    z-index: 100;
+    display: none;
+    overflow: hidden;
+  }
+ 
+  .history-panel.visible { display: block; }
+ 
+  .history-panel-header {
+    padding: 10px 14px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid #f3f4f6;
+  }
+ 
+  .history-empty {
+    padding: 16px 14px;
+    font-size: 0.78rem;
+    color: #9ca3af;
+    text-align: center;
+  }
+ 
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-bottom: 1px solid #f9fafb;
+    font-size: 0.78rem;
+  }
+ 
+  .history-item:last-child { border-bottom: none; }
+ 
+  .history-item-info { color: #374151; }
+  .history-item-date { font-size: 0.7rem; color: #9ca3af; margin-top: 1px; }
+ 
+  .history-restore-btn {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+    border-radius: 5px;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+ 
+  .history-restore-btn:hover { background: #dcfce7; }
+ 
+  .history-clear-btn {
+    width: 100%;
+    padding: 8px;
+    background: #fef2f2;
+    color: #dc2626;
+    border: none;
+    border-top: 1px solid #fee2e2;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+ 
+  .history-clear-btn:hover { background: #fee2e2; }
+ 
+  .header-right { position: relative; }
 </style>
 </head>
 <body>
@@ -313,6 +424,16 @@ Copy
   <div>
     <h1>Lead Times Dashboard</h1>
     <div class="subtitle">Czasy realizacji zadań · 2024–2025</div>
+  </div>
+  <div class="header-right">
+    <button class="history-btn" id="historyBtn" disabled>
+      ↩ Przywróć
+      <span class="history-badge" id="historyBadge">0</span>
+    </button>
+    <div class="history-panel" id="historyPanel">
+      <div class="history-panel-header">Usunięte punkty</div>
+      <div id="historyList"></div>
+    </div>
   </div>
 </div>
  
@@ -346,10 +467,7 @@ Copy
       </div>
     </div>
   </div>
-  <div class="undo-bar" id="undoBar">
-    <span id="undoMsg"></span>
-    <button class="undo-btn" id="undoBtn">↩ Cofnij</button>
-  </div>
+  <div class="undo-bar" id="undoBar" style="display:none"></div>
  
   <div class="percentile-info" id="percentileInfo"></div>
 </div>
@@ -525,14 +643,86 @@ const dpTitle = document.getElementById('dpTitle');
 const dpSub = document.getElementById('dpSub');
 const dpDeleteBtn = document.getElementById('dpDeleteBtn');
 const dpCancelBtn = document.getElementById('dpCancelBtn');
-const undoBar = document.getElementById('undoBar');
-const undoMsg = document.getElementById('undoMsg');
-const undoBtn = document.getElementById('undoBtn');
  
 let selectedDot = null;
 let selectedData = null;
-let lastDeleted = null;
-let undoTimeout = null;
+let deletedHistory = []; // stack of removed items
+ 
+const historyBtn = document.getElementById('historyBtn');
+const historyBadge = document.getElementById('historyBadge');
+const historyPanel = document.getElementById('historyPanel');
+const historyList = document.getElementById('historyList');
+ 
+function updateHistoryUI() {
+  const count = deletedHistory.length;
+  historyBtn.disabled = count === 0;
+  historyBadge.textContent = count;
+  historyBadge.classList.toggle('visible', count > 0);
+ 
+  if (count === 0) {
+    historyList.innerHTML = '<div class="history-empty">Brak usuniętych punktów</div>';
+  } else {
+    historyList.innerHTML = deletedHistory.slice().reverse().map((entry, ri) => {
+      const i = deletedHistory.length - 1 - ri;
+      const color = COLORS[entry.item.size];
+      return `<div class="history-item">
+        <div>
+          <div class="history-item-info">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px;vertical-align:middle"></span>
+            <strong>${entry.item.lt} dni</strong> · ${LABELS[entry.item.size]}
+          </div>
+          <div class="history-item-date">${entry.item.dateStr}</div>
+        </div>
+        <button class="history-restore-btn" data-idx="${i}">Przywróć</button>
+      </div>`;
+    }).join('');
+ 
+    if (count > 1) {
+      historyList.innerHTML += `<button class="history-clear-btn" id="restoreAllBtn">↩ Przywróć wszystkie (${count})</button>`;
+    }
+ 
+    // Restore single
+    historyList.querySelectorAll('.history-restore-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const idx = +btn.dataset.idx;
+        const entry = deletedHistory.splice(idx, 1)[0];
+        activeData.splice(entry.originalIdx, 0, entry.item);
+        historyPanel.classList.remove('visible');
+        rebuildChart();
+        updateHistoryUI();
+      });
+    });
+ 
+    // Restore all
+    const restoreAllBtn = document.getElementById('restoreAllBtn');
+    if (restoreAllBtn) {
+      restoreAllBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        deletedHistory.slice().reverse().forEach(entry => {
+          activeData.splice(entry.originalIdx, 0, entry.item);
+        });
+        deletedHistory = [];
+        historyPanel.classList.remove('visible');
+        rebuildChart();
+        updateHistoryUI();
+      });
+    }
+  }
+}
+ 
+// Toggle history panel
+historyBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  historyPanel.classList.toggle('visible');
+  updateHistoryUI();
+});
+ 
+document.addEventListener('click', e => {
+  if (!historyPanel.contains(e.target) && e.target !== historyBtn) {
+    historyPanel.classList.remove('visible');
+  }
+});
  
 function closePopup() {
   deletePopup.classList.remove('visible');
@@ -555,25 +745,14 @@ dpDeleteBtn.addEventListener('click', () => {
   if (!selectedData) return;
   const idx = activeData.indexOf(selectedData);
   if (idx === -1) return;
-  lastDeleted = { item: selectedData, idx };
+  deletedHistory.push({ item: selectedData, originalIdx: idx });
   activeData.splice(idx, 1);
   closePopup();
   rebuildChart();
-  // Undo bar
-  undoMsg.textContent = `Usunięto: ${selectedData.dateStr} · ${selectedData.lt} dni`;
-  undoBar.classList.add('visible');
-  clearTimeout(undoTimeout);
-  undoTimeout = setTimeout(() => { undoBar.classList.remove('visible'); lastDeleted = null; }, 6000);
+  updateHistoryUI();
 });
  
-undoBtn.addEventListener('click', () => {
-  if (!lastDeleted) return;
-  activeData.splice(lastDeleted.idx, 0, lastDeleted.item);
-  lastDeleted = null;
-  undoBar.classList.remove('visible');
-  clearTimeout(undoTimeout);
-  rebuildChart();
-});
+ 
  
 function renderDots() {
   g.selectAll('circle.dot').remove();
