@@ -12,8 +12,8 @@ Copy
   * { margin: 0; padding: 0; box-sizing: border-box; }
  
   body {
-    background: #0d1117;
-    color: #e6edf3;
+    background: #f4f6f9;
+    color: #1a1f2e;
     font-family: 'Segoe UI', system-ui, sans-serif;
     min-height: 100vh;
     padding: 24px;
@@ -22,13 +22,13 @@ Copy
   h1 {
     font-size: 1.4rem;
     font-weight: 600;
-    color: #f0f6ff;
+    color: #111827;
     letter-spacing: 0.02em;
   }
  
   .subtitle {
     font-size: 0.82rem;
-    color: #7d8590;
+    color: #6b7280;
     margin-top: 4px;
   }
  
@@ -49,16 +49,17 @@ Copy
   }
  
   .stat-card {
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 12px 18px;
     min-width: 110px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
  
   .stat-label {
     font-size: 0.72rem;
-    color: #7d8590;
+    color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
@@ -70,16 +71,17 @@ Copy
   }
  
   .chart-container {
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 20px 20px 10px 20px;
     position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
  
   .chart-title {
     font-size: 0.85rem;
-    color: #8b949e;
+    color: #6b7280;
     margin-bottom: 14px;
   }
  
@@ -100,14 +102,14 @@ Copy
  
   .control-label {
     font-size: 0.78rem;
-    color: #8b949e;
+    color: #6b7280;
     white-space: nowrap;
   }
  
   .percentile-toggle {
     display: flex;
-    background: #0d1117;
-    border: 1px solid #30363d;
+    background: #f4f6f9;
+    border: 1px solid #d1d5db;
     border-radius: 7px;
     overflow: hidden;
   }
@@ -119,7 +121,7 @@ Copy
     cursor: pointer;
     border: none;
     background: transparent;
-    color: #7d8590;
+    color: #9ca3af;
     transition: all 0.15s;
     user-select: none;
   }
@@ -128,9 +130,9 @@ Copy
     color: #fff;
   }
  
-  .ptoggle[data-p="50"].active  { background: #d29922; color: #0d1117; }
-  .ptoggle[data-p="85"].active  { background: #e06c47; color: #fff; }
-  .ptoggle[data-p="95"].active  { background: #bc4c4c; color: #fff; }
+  .ptoggle[data-p="50"].active  { background: #ff6b6b; color: #fff; }
+  .ptoggle[data-p="85"].active  { background: #e03c3c; color: #fff; }
+  .ptoggle[data-p="95"].active  { background: #a00000; color: #fff; }
  
   .size-legend {
     display: flex;
@@ -144,7 +146,7 @@ Copy
     align-items: center;
     gap: 6px;
     font-size: 0.78rem;
-    color: #8b949e;
+    color: #6b7280;
     cursor: pointer;
     user-select: none;
     transition: opacity 0.15s;
@@ -156,29 +158,29 @@ Copy
     width: 11px;
     height: 11px;
     border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.2);
+    border: 2px solid rgba(0,0,0,0.1);
   }
  
   /* SVG styles injected via JS */
  
   .tooltip {
     position: absolute;
-    background: #1c2128;
-    border: 1px solid #30363d;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
     padding: 10px 14px;
     font-size: 0.78rem;
-    color: #e6edf3;
+    color: #1a1f2e;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.12s;
     z-index: 10;
     white-space: nowrap;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   }
  
-  .tooltip strong { color: #f0f6ff; }
-  .tooltip .tt-size { font-size: 0.7rem; color: #8b949e; margin-top: 2px; }
+  .tooltip strong { color: #111827; }
+  .tooltip .tt-size { font-size: 0.7rem; color: #6b7280; margin-top: 2px; }
  
   .percentile-info {
     display: flex;
@@ -192,7 +194,7 @@ Copy
     align-items: center;
     gap: 8px;
     font-size: 0.78rem;
-    color: #8b949e;
+    color: #6b7280;
     opacity: 0;
     transition: opacity 0.2s;
   }
@@ -205,7 +207,7 @@ Copy
     border-radius: 2px;
   }
  
-  .pinfo-val { color: #e6edf3; font-weight: 600; }
+  .pinfo-val { color: #111827; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -265,7 +267,7 @@ const data = RAW.map(d => ({
 })).sort((a,b) => a.date - b.date);
  
 // Colors
-const COLORS = { S: '#58a6ff', M: '#3fb950', L: '#e06c47' };
+const COLORS = { S: '#a371f7', M: '#58a6ff', L: '#3fb950' };
 const LABELS = { S: 'Small', M: 'Medium', L: 'Large' };
  
 // Percentile calc
@@ -283,22 +285,42 @@ const P = {
   95: percentile(allLT, 95)
 };
  
-const PCOLORS = { 50: '#d29922', 85: '#e06c47', 95: '#bc4c4c' };
+const PCOLORS = { 50: '#ff6b6b', 85: '#e03c3c', 95: '#a00000' };
  
 // Stats
-const statsData = [
-  { label: 'Zadania', value: data.length, color: '#58a6ff' },
-  { label: 'Mediana', value: Math.round(P[50]) + ' dni', color: '#d29922' },
-  { label: 'P85', value: Math.round(P[85]) + ' dni', color: '#e06c47' },
-  { label: 'P95', value: Math.round(P[95]) + ' dni', color: '#bc4c4c' },
-  { label: 'Maks', value: Math.max(...allLT) + ' dni', color: '#8b949e' },
-];
- 
+// Size counts using same COLORS as dots
 const statsRow = document.getElementById('statsRow');
-statsData.forEach(s => {
-  statsRow.innerHTML += `<div class="stat-card">
-    <div class="stat-label">${s.label}</div>
-    <div class="stat-value" style="color:${s.color}">${s.value}</div>
+ 
+// Total
+statsRow.innerHTML += `<div class="stat-card">
+  <div class="stat-label">Wszystkie</div>
+  <div class="stat-value" style="color:#e6edf3">${data.length}</div>
+</div>`;
+ 
+// Per size — colors match legend dots
+['S','M','L'].forEach(sz => {
+  const count = data.filter(d => d.size === sz).length;
+  statsRow.innerHTML += `<div class="stat-card" style="border-color:${COLORS[sz]}33">
+    <div class="stat-label" style="display:flex;align-items:center;gap:6px">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${COLORS[sz]}"></span>
+      ${LABELS[sz]}
+    </div>
+    <div class="stat-value" style="color:${COLORS[sz]}">${count}</div>
+  </div>`;
+});
+ 
+// Percentile stats — colors match toggle buttons
+[
+  { label: 'Mediana (P50)', p: 50 },
+  { label: 'P85', p: 85 },
+  { label: 'P95', p: 95 },
+].forEach(({ label, p }) => {
+  statsRow.innerHTML += `<div class="stat-card" style="border-color:${PCOLORS[p]}33">
+    <div class="stat-label" style="display:flex;align-items:center;gap:6px">
+      <span style="display:inline-block;width:8px;height:3px;border-radius:2px;background:${PCOLORS[p]}"></span>
+      ${label}
+    </div>
+    <div class="stat-value" style="color:${PCOLORS[p]}">${Math.round(P[p])} dni</div>
   </div>`;
 });
  
@@ -360,7 +382,7 @@ g.append('g').attr('class', 'grid-y')
   .enter().append('line')
   .attr('x1', 0).attr('x2', iW)
   .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
-  .attr('stroke', '#21262d').attr('stroke-width', 1);
+  .attr('stroke', '#e5e7eb').attr('stroke-width', 1);
  
 // Axes
 const xAxis = d3.axisBottom(xScale)
