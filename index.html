@@ -208,6 +208,103 @@ Copy
   }
  
   .pinfo-val { color: #111827; font-weight: 600; }
+ 
+  /* Delete popup */
+  .delete-popup {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.78rem;
+    color: #1a1f2e;
+    pointer-events: all;
+    z-index: 20;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    min-width: 170px;
+    display: none;
+  }
+ 
+  .delete-popup.visible { display: block; }
+ 
+  .delete-popup .dp-title {
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 2px;
+  }
+ 
+  .delete-popup .dp-sub {
+    color: #6b7280;
+    font-size: 0.72rem;
+    margin-bottom: 10px;
+  }
+ 
+  .delete-popup .dp-actions {
+    display: flex;
+    gap: 8px;
+  }
+ 
+  .dp-btn-delete {
+    flex: 1;
+    padding: 6px 0;
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+ 
+  .dp-btn-delete:hover { background: #b91c1c; }
+ 
+  .dp-btn-cancel {
+    flex: 1;
+    padding: 6px 0;
+    background: #f3f4f6;
+    color: #374151;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+ 
+  .dp-btn-cancel:hover { background: #e5e7eb; }
+ 
+  .dot-selected {
+    stroke-width: 3 !important;
+    stroke-opacity: 1 !important;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.25));
+  }
+ 
+  .undo-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: #1a1f2e;
+    color: #f9fafb;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-size: 0.78rem;
+    margin-top: 14px;
+  }
+ 
+  .undo-bar.visible { display: flex; }
+ 
+  .undo-btn {
+    background: #fff;
+    color: #1a1f2e;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: auto;
+  }
 </style>
 </head>
 <body>
@@ -240,6 +337,18 @@ Copy
   <div style="position:relative">
     <svg id="chart"></svg>
     <div class="tooltip" id="tooltip"></div>
+    <div class="delete-popup" id="deletePopup">
+      <div class="dp-title" id="dpTitle"></div>
+      <div class="dp-sub" id="dpSub"></div>
+      <div class="dp-actions">
+        <button class="dp-btn-delete" id="dpDeleteBtn">🗑 Usuń punkt</button>
+        <button class="dp-btn-cancel" id="dpCancelBtn">Anuluj</button>
+      </div>
+    </div>
+  </div>
+  <div class="undo-bar" id="undoBar">
+    <span id="undoMsg"></span>
+    <button class="undo-btn" id="undoBtn">↩ Cofnij</button>
   </div>
  
   <div class="percentile-info" id="percentileInfo"></div>
@@ -294,7 +403,7 @@ const statsRow = document.getElementById('statsRow');
 // Total
 statsRow.innerHTML += `<div class="stat-card">
   <div class="stat-label">Wszystkie</div>
-  <div class="stat-value" style="color:#e6edf3">${data.length}</div>
+  <div class="stat-value" style="color:#111827">${data.length}</div>
 </div>`;
  
 // Per size — colors match legend dots
@@ -396,55 +505,184 @@ const yAxis = d3.axisLeft(yScale)
 g.append('g')
   .attr('transform', `translate(0,${iH})`)
   .call(xAxis)
-  .call(ax => ax.select('.domain').attr('stroke', '#30363d'))
-  .call(ax => ax.selectAll('line').attr('stroke', '#30363d'))
-  .call(ax => ax.selectAll('text').attr('fill', '#7d8590').attr('font-size', '11px'));
+  .call(ax => ax.select('.domain').attr('stroke', '#d1d5db'))
+  .call(ax => ax.selectAll('line').attr('stroke', '#d1d5db'))
+  .call(ax => ax.selectAll('text').attr('fill', '#6b7280').attr('font-size', '11px'));
  
 g.append('g')
   .call(yAxis)
-  .call(ax => ax.select('.domain').attr('stroke', '#30363d'))
-  .call(ax => ax.selectAll('line').attr('stroke', '#30363d'))
-  .call(ax => ax.selectAll('text').attr('fill', '#7d8590').attr('font-size', '11px'));
+  .call(ax => ax.select('.domain').attr('stroke', '#d1d5db'))
+  .call(ax => ax.selectAll('line').attr('stroke', '#d1d5db'))
+  .call(ax => ax.selectAll('text').attr('fill', '#6b7280').attr('font-size', '11px'));
  
 // Percentile lines group (behind dots)
 const pGroup = g.append('g').attr('class', 'plines');
  
 // Dots
 const tooltip = document.getElementById('tooltip');
+const deletePopup = document.getElementById('deletePopup');
+const dpTitle = document.getElementById('dpTitle');
+const dpSub = document.getElementById('dpSub');
+const dpDeleteBtn = document.getElementById('dpDeleteBtn');
+const dpCancelBtn = document.getElementById('dpCancelBtn');
+const undoBar = document.getElementById('undoBar');
+const undoMsg = document.getElementById('undoMsg');
+const undoBtn = document.getElementById('undoBtn');
  
-const dots = g.selectAll('circle.dot')
-  .data(data)
-  .enter().append('circle')
-  .attr('class', 'dot')
-  .attr('cx', d => xScale(d.date))
-  .attr('cy', d => yScale(d.lt))
-  .attr('r', 7)
-  .attr('fill', d => COLORS[d.size])
-  .attr('fill-opacity', 0.85)
-  .attr('stroke', d => COLORS[d.size])
-  .attr('stroke-width', 1.5)
-  .attr('stroke-opacity', 0.4)
-  .style('cursor', 'pointer')
-  .on('mouseover', function(event, d) {
-    d3.select(this).transition().duration(80).attr('r', 10).attr('fill-opacity', 1);
-    const rect = document.getElementById('chart').getBoundingClientRect();
-    const cx = +d3.select(this).attr('cx');
-    const cy = +d3.select(this).attr('cy');
-    const tx = margin.left + cx + 14;
-    const ty = margin.top + cy - 10;
-    tooltip.style.left = tx + 'px';
-    tooltip.style.top = ty + 'px';
-    tooltip.style.opacity = '1';
-    tooltip.innerHTML = `<strong>${d.lt} dni</strong><div class="tt-size">${d.dateStr} · ${LABELS[d.size]}</div>`;
-  })
-  .on('mouseout', function() {
-    d3.select(this).transition().duration(80).attr('r', 7).attr('fill-opacity', 0.85);
-    tooltip.style.opacity = '0';
+let selectedDot = null;
+let selectedData = null;
+let lastDeleted = null;
+let undoTimeout = null;
+ 
+function closePopup() {
+  deletePopup.classList.remove('visible');
+  if (selectedDot) {
+    selectedDot.classed('dot-selected', false);
+    selectedDot.transition().duration(80).attr('r', 7).attr('fill-opacity', 0.85);
+  }
+  selectedDot = null;
+  selectedData = null;
+}
+ 
+// Click outside to close
+document.addEventListener('click', e => {
+  if (!deletePopup.contains(e.target) && !e.target.closest('circle')) closePopup();
+});
+ 
+dpCancelBtn.addEventListener('click', closePopup);
+ 
+dpDeleteBtn.addEventListener('click', () => {
+  if (!selectedData) return;
+  const idx = activeData.indexOf(selectedData);
+  if (idx === -1) return;
+  lastDeleted = { item: selectedData, idx };
+  activeData.splice(idx, 1);
+  closePopup();
+  rebuildChart();
+  // Undo bar
+  undoMsg.textContent = `Usunięto: ${selectedData.dateStr} · ${selectedData.lt} dni`;
+  undoBar.classList.add('visible');
+  clearTimeout(undoTimeout);
+  undoTimeout = setTimeout(() => { undoBar.classList.remove('visible'); lastDeleted = null; }, 6000);
+});
+ 
+undoBtn.addEventListener('click', () => {
+  if (!lastDeleted) return;
+  activeData.splice(lastDeleted.idx, 0, lastDeleted.item);
+  lastDeleted = null;
+  undoBar.classList.remove('visible');
+  clearTimeout(undoTimeout);
+  rebuildChart();
+});
+ 
+function renderDots() {
+  g.selectAll('circle.dot').remove();
+  g.selectAll('circle.dot')
+    .data(activeData)
+    .enter().append('circle')
+    .attr('class', 'dot')
+    .attr('cx', d => xScale(d.date))
+    .attr('cy', d => yScale(d.lt))
+    .attr('r', 7)
+    .attr('fill', d => COLORS[d.size])
+    .attr('fill-opacity', 0.85)
+    .attr('stroke', d => COLORS[d.size])
+    .attr('stroke-width', 1.5)
+    .attr('stroke-opacity', 0.4)
+    .style('cursor', 'pointer')
+    .on('mouseover', function(event, d) {
+      if (selectedData === d) return;
+      d3.select(this).transition().duration(80).attr('r', 10).attr('fill-opacity', 1);
+      const cx = +d3.select(this).attr('cx');
+      const cy = +d3.select(this).attr('cy');
+      tooltip.style.left = (margin.left + cx + 14) + 'px';
+      tooltip.style.top = (margin.top + cy - 10) + 'px';
+      tooltip.style.opacity = '1';
+      tooltip.innerHTML = `<strong>${d.lt} dni</strong><div class="tt-size">${d.dateStr} · ${LABELS[d.size]}</div><div class="tt-size" style="margin-top:4px;color:#a371f7">Kliknij aby zaznaczyć</div>`;
+    })
+    .on('mouseout', function(event, d) {
+      if (selectedData === d) return;
+      d3.select(this).transition().duration(80).attr('r', 7).attr('fill-opacity', 0.85);
+      tooltip.style.opacity = '0';
+    })
+    .on('click', function(event, d) {
+      event.stopPropagation();
+      tooltip.style.opacity = '0';
+      // Deselect previous
+      if (selectedDot) {
+        selectedDot.classed('dot-selected', false);
+        selectedDot.transition().duration(80).attr('r', 7).attr('fill-opacity', 0.85);
+      }
+      if (selectedData === d) { selectedDot = null; selectedData = null; deletePopup.classList.remove('visible'); return; }
+      // Select new
+      selectedDot = d3.select(this);
+      selectedData = d;
+      selectedDot.classed('dot-selected', true).transition().duration(80).attr('r', 11).attr('fill-opacity', 1);
+      // Position popup
+      const cx = +selectedDot.attr('cx');
+      const cy = +selectedDot.attr('cy');
+      let px = margin.left + cx + 16;
+      let py = margin.top + cy - 20;
+      // Keep inside chart
+      if (px + 180 > W) px = margin.left + cx - 195;
+      deletePopup.style.left = px + 'px';
+      deletePopup.style.top = py + 'px';
+      dpTitle.textContent = `${d.lt} dni`;
+      dpSub.innerHTML = `${d.dateStr} &middot; ${LABELS[d.size]}`;
+      deletePopup.classList.add('visible');
+    });
+ 
+  // Reapply size filter
+  g.selectAll('circle.dot').attr('opacity', d => sizeVisible[d.size] ? 1 : 0.08);
+}
+ 
+// Mutable working dataset
+let activeData = [...data];
+ 
+renderDots();
+ 
+function rebuildChart() {
+  const lts = activeData.map(d => d.lt);
+ 
+  // Recalc percentiles
+  P[50] = lts.length ? percentile(lts, 50) : 0;
+  P[85] = lts.length ? percentile(lts, 85) : 0;
+  P[95] = lts.length ? percentile(lts, 95) : 0;
+ 
+  // Rebuild stats row
+  const statsRow = document.getElementById('statsRow');
+  statsRow.innerHTML = '';
+  statsRow.innerHTML += `<div class="stat-card">
+    <div class="stat-label">Wszystkie</div>
+    <div class="stat-value" style="color:#111827">${activeData.length}</div>
+  </div>`;
+  ['S','M','L'].forEach(sz => {
+    const count = activeData.filter(d => d.size === sz).length;
+    statsRow.innerHTML += `<div class="stat-card" style="border-color:${COLORS[sz]}33">
+      <div class="stat-label" style="display:flex;align-items:center;gap:6px">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${COLORS[sz]}"></span>
+        ${LABELS[sz]}
+      </div>
+      <div class="stat-value" style="color:${COLORS[sz]}">${count}</div>
+    </div>`;
+  });
+  [{label:'Mediana (P50)',p:50},{label:'P85',p:85},{label:'P95',p:95}].forEach(({label,p}) => {
+    statsRow.innerHTML += `<div class="stat-card" style="border-color:${PCOLORS[p]}33">
+      <div class="stat-label" style="display:flex;align-items:center;gap:6px">
+        <span style="display:inline-block;width:8px;height:3px;border-radius:2px;background:${PCOLORS[p]}"></span>
+        ${label}
+      </div>
+      <div class="stat-value" style="color:${PCOLORS[p]}">${Math.round(P[p])} dni</div>
+    </div>`;
   });
  
+  renderDots();
+  updatePercentileLines();
+  updatePercentileInfo();
+}
+ 
 function updateDots() {
-  dots.transition().duration(200)
-    .attr('opacity', d => sizeVisible[d.size] ? 1 : 0.08);
+  g.selectAll('circle.dot').attr('opacity', d => sizeVisible[d.size] ? 1 : 0.08);
 }
  
 function updatePercentileLines() {
@@ -487,7 +725,7 @@ function updatePercentileInfo() {
   pinfoEl.innerHTML = '';
   [50, 85, 95].forEach(p => {
     if (!activePercentiles[p]) return;
-    const pct = data.filter(d => d.lt <= P[p]).length / data.length * 100;
+    const pct = activeData.filter(d => d.lt <= P[p]).length / (activeData.length || 1) * 100;
     pinfoEl.innerHTML += `<div class="pinfo visible">
       <div class="pinfo-line" style="background:${PCOLORS[p]}"></div>
       <span>P${p}: <span class="pinfo-val">${Math.round(P[p])} dni</span> — ${Math.round(pct)}% zadań ukończonych w tym czasie</span>
