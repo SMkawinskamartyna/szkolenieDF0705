@@ -1,4 +1,4 @@
-Monte carlo backlog · HTML
+Monte carlo scope growth · HTML
 Copy
 
 <!DOCTYPE html>
@@ -6,611 +6,594 @@ Copy
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monte Carlo · Prognoza Backlogu</title>
+<title>Monte Carlo · Analiza wzrostu zakresu</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
 :root {
-  --bg:       #f7f5f2;
-  --surface:  #ffffff;
-  --border:   #e8e4de;
-  --text:     #1a1714;
-  --muted:    #7a7470;
-  --accent:   #1d3557;
-  --p50:      #2196f3;
-  --p85:      #f59e0b;
-  --p95:      #ef4444;
-  --green:    #16a34a;
-  --purple:   #7c3aed;
-  --bar-base: #d1cfc9;
+  --bg:      #f7f5f2;
+  --surface: #ffffff;
+  --border:  #e8e4de;
+  --text:    #1a1714;
+  --muted:   #7a7470;
+  --mono:    'DM Mono', monospace;
+ 
+  --c-base:  #1d3557;
+  --c-20:    #e07b39;
+  --c-25:    #d44f6e;
+  --c-30:    #7c3aed;
+ 
+  --p50:  #2196f3;
+  --p85:  #f59e0b;
+  --p95:  #ef4444;
 }
  
 * { margin:0; padding:0; box-sizing:border-box; }
- 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
-  min-height: 100vh;
-  padding: 32px 28px;
+  padding: 28px 24px;
 }
  
-/* ── HEADER ── */
+/* HEADER */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 28px; padding-bottom: 20px;
   border-bottom: 2px solid var(--text);
+  flex-wrap: wrap; gap: 12px;
 }
-.header-left h1 {
+.header h1 {
   font-family: 'DM Serif Display', serif;
-  font-size: 2.1rem;
-  font-weight: 400;
+  font-size: 1.9rem; font-weight: 400;
+  letter-spacing: -0.02em; line-height: 1.15;
+}
+.header p { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+.badge {
+  background: var(--text); color: #f7f5f2;
+  font-family: var(--mono); font-size: 0.7rem; padding: 5px 12px;
+  border-radius: 4px; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+}
+ 
+/* SCENARIO LEGEND */
+.scenario-legend {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.sc-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 16px; font-size: 0.8rem;
+}
+.sc-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.sc-name { font-weight: 600; }
+.sc-desc { color: var(--muted); font-size: 0.73rem; margin-top: 1px; }
+ 
+/* SUMMARY COMPARISON TABLE */
+.summary-section { margin-bottom: 24px; }
+.section-title {
+  font-size: 0.7rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;
+}
+ 
+.compare-table {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.ct-header {
+  display: grid; grid-template-columns: 1.6fr repeat(4,1fr);
+  background: var(--bg); border-bottom: 2px solid var(--border);
+  padding: 0;
+}
+.ct-header-cell {
+  padding: 10px 14px; font-size: 0.7rem; font-weight: 700;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+  display: flex; align-items: center; gap: 7px;
+}
+.ct-row {
+  display: grid; grid-template-columns: 1.6fr repeat(4,1fr);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.ct-row:last-child { border-bottom: none; }
+.ct-row:hover { background: var(--bg); }
+.ct-cell {
+  padding: 12px 14px; font-size: 0.82rem;
+  display: flex; align-items: center;
+}
+.ct-cell.label {
+  font-weight: 600; color: var(--muted);
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.ct-val {
+  font-family: var(--mono); font-size: 0.88rem; font-weight: 500;
   color: var(--text);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
 }
-.header-left p {
-  font-size: 0.83rem;
-  color: var(--muted);
-  margin-top: 5px;
-  font-weight: 400;
+.ct-date {
+  font-family: var(--mono); font-size: 0.75rem; color: var(--muted); margin-top: 2px;
 }
-.header-badge {
-  background: var(--accent);
-  color: white;
-  font-family: 'DM Mono', monospace;
-  font-size: 0.72rem;
-  padding: 6px 14px;
-  border-radius: 4px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.pct-tag {
+  display: inline-block; padding: 2px 7px; border-radius: 12px;
+  font-family: var(--mono); font-size: 0.68rem; font-weight: 600;
+  color: white; margin-right: 4px;
 }
+.p50-bg { background: var(--p50); }
+.p85-bg { background: var(--p85); }
+.p95-bg { background: var(--p95); }
  
-/* ── PARAMS ROW ── */
-.params-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
+/* CHART SECTIONS */
+.charts-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; margin-bottom: 24px;
 }
-.param-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 14px;
-  font-size: 0.78rem;
-}
-.param-chip .chip-label {
-  color: var(--muted);
-  font-weight: 500;
-}
-.param-chip .chip-value {
-  font-family: 'DM Mono', monospace;
-  font-weight: 500;
-  color: var(--text);
-  font-size: 0.82rem;
-}
- 
-/* ── ANSWER CARDS ── */
-.answers-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-@media (max-width: 700px) { .answers-grid { grid-template-columns: 1fr; } }
- 
-.answer-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 22px 24px;
-  position: relative;
-  overflow: hidden;
-}
-.answer-card::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 4px;
-  background: var(--accent);
-}
-.answer-card.q2::before { background: var(--purple); }
- 
-.answer-q {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  margin-bottom: 14px;
-}
-.answer-rows { display: flex; flex-direction: column; gap: 10px; }
-.answer-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: var(--bg);
-}
-.answer-pct {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 3px 9px;
-  border-radius: 20px;
-  color: white;
-}
-.pct-50 { background: var(--p50); }
-.pct-85 { background: var(--p85); }
-.pct-95 { background: var(--p95); }
-.pct-mean { background: var(--purple); }
- 
-.answer-main {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text);
-  font-family: 'DM Serif Display', serif;
-}
-.answer-sub {
-  font-size: 0.74rem;
-  color: var(--muted);
-  margin-top: 1px;
-}
- 
-/* ── CHARTS SECTION ── */
-.charts-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-@media (max-width: 800px) { .charts-grid { grid-template-columns: 1fr; } }
+@media(max-width:800px){ .charts-row { grid-template-columns: 1fr; } }
  
 .chart-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px;
 }
-.chart-card-title {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  margin-bottom: 4px;
-}
-.chart-card-subtitle {
-  font-size: 0.72rem;
-  color: #b0aba5;
-  margin-bottom: 16px;
-}
+.chart-card-title { font-size: 0.78rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.chart-card-sub { font-size: 0.7rem; color: var(--muted); margin-bottom: 14px; }
  
-/* ── THROUGHPUT DOTS ── */
-.tp-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px 24px;
-  margin-bottom: 16px;
+/* IMPACT CALLOUT */
+.impact-row {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 14px; margin-bottom: 24px;
 }
-.tp-title {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  margin-bottom: 14px;
-}
-.tp-dots {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  height: 54px;
-}
-.tp-dot-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-}
-.tp-bar {
-  width: 100%;
-  border-radius: 4px 4px 0 0;
-  background: var(--accent);
-  opacity: 0.85;
-  transition: opacity 0.2s;
-  min-width: 28px;
-}
-.tp-bar:hover { opacity: 1; }
-.tp-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text);
-}
-.tp-stats {
-  display: flex;
-  gap: 20px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-.tp-stat { text-align: center; flex: 1; }
-.tp-stat-val {
-  font-family: 'DM Mono', monospace;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--accent);
-}
-.tp-stat-lbl {
-  font-size: 0.68rem;
-  color: var(--muted);
-  margin-top: 2px;
-}
+@media(max-width:700px){ .impact-row { grid-template-columns: 1fr; } }
  
-/* ── FOOTER NOTE ── */
-.footnote {
-  font-size: 0.72rem;
-  color: var(--muted);
-  padding: 14px 18px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  line-height: 1.6;
+.impact-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 20px;
+  position: relative; overflow: hidden;
 }
+.impact-card::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; right: 0; height: 3px;
+}
+.impact-card.c0::after { background: var(--c-base); }
+.impact-card.c1::after { background: var(--c-20); }
+.impact-card.c2::after { background: var(--c-25); }
+.impact-card.c3::after { background: var(--c-30); }
  
-/* ── TOOLTIP ── */
+.ic-label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+.ic-main { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--text); line-height: 1.1; }
+.ic-sub { font-size: 0.73rem; color: var(--muted); margin-top: 4px; }
+.ic-delta { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 6px; }
+.delta-warn { background: #fef3c7; color: #b45309; }
+.delta-danger { background: #fde8ed; color: #be2b50; }
+ 
+/* TOOLTIP */
 .tooltip {
-  position: fixed;
-  background: var(--text);
-  color: #f5f3f0;
-  border-radius: 7px;
-  padding: 9px 13px;
-  font-size: 0.74rem;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.1s;
-  z-index: 200;
-  white-space: nowrap;
-  font-family: 'DM Mono', monospace;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  position: fixed; background: var(--text); color: #f5f3f0;
+  border-radius: 7px; padding: 8px 12px; font-size: 0.73rem;
+  pointer-events: none; opacity: 0; transition: opacity 0.1s;
+  z-index:200; font-family: var(--mono);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.22); white-space: nowrap;
+}
+ 
+/* FOOTNOTE */
+.footnote {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 18px;
+  font-size: 0.72rem; color: var(--muted); line-height: 1.7;
 }
 </style>
 </head>
 <body>
  
 <div class="header">
-  <div class="header-left">
-    <h1>Prognoza Monte Carlo<br>Backlog · 62 elementy</h1>
-    <p>Start: 1 czerwca 2026 · Sprinty 2-tygodniowe · 100 000 symulacji</p>
+  <div>
+    <h1>Wpływ wzrostu zakresu<br>na prognozę backlogu</h1>
+    <p>Porównanie 4 scenariuszy · 100 000 symulacji każdy · start 1 czerwca 2026</p>
   </div>
-  <div class="header-badge">n = 100 000 symulacji</div>
+  <div class="badge">Monte Carlo · n=100 000</div>
 </div>
  
-<!-- Params -->
-<div class="params-row">
-  <div class="param-chip"><span class="chip-label">Backlog</span><span class="chip-value">62 elementy</span></div>
-  <div class="param-chip"><span class="chip-label">Start</span><span class="chip-value">2026-06-01</span></div>
-  <div class="param-chip"><span class="chip-label">Sprint</span><span class="chip-value">2 tygodnie</span></div>
-  <div class="param-chip"><span class="chip-label">Historia TP</span><span class="chip-value">11 sprintów</span></div>
-  <div class="param-chip"><span class="chip-label">TP zakres</span><span class="chip-value">2 – 6 / sprint</span></div>
-  <div class="param-chip"><span class="chip-label">TP mediana</span><span class="chip-value">4.0 / sprint</span></div>
-  <div class="param-chip"><span class="chip-label">Sprinty do 31.08</span><span class="chip-value">6 sprintów</span></div>
-</div>
- 
-<!-- Throughput history -->
-<div class="tp-card">
-  <div class="tp-title">Historyczne tempo dostarczania (11 sprintów 2-tygodniowych)</div>
-  <div class="tp-dots" id="tpDots"></div>
-  <div class="tp-stats">
-    <div class="tp-stat"><div class="tp-stat-val">4.18</div><div class="tp-stat-lbl">Średnia</div></div>
-    <div class="tp-stat"><div class="tp-stat-val">4.0</div><div class="tp-stat-lbl">Mediana</div></div>
-    <div class="tp-stat"><div class="tp-stat-val">2</div><div class="tp-stat-lbl">Min</div></div>
-    <div class="tp-stat"><div class="tp-stat-val">6</div><div class="tp-stat-lbl">Max</div></div>
-    <div class="tp-stat"><div class="tp-stat-val">46</div><div class="tp-stat-lbl">Suma</div></div>
+<!-- Scenario legend -->
+<div class="scenario-legend">
+  <div class="sc-chip">
+    <div class="sc-dot" style="background:var(--c-base)"></div>
+    <div><div class="sc-name">Bazowy</div><div class="sc-desc">62 elementy · bez wzrostu</div></div>
+  </div>
+  <div class="sc-chip">
+    <div class="sc-dot" style="background:var(--c-20)"></div>
+    <div><div class="sc-name">+20% wzrostu</div><div class="sc-desc">74 elementy · optymistyczny</div></div>
+  </div>
+  <div class="sc-chip">
+    <div class="sc-dot" style="background:var(--c-25)"></div>
+    <div><div class="sc-name">+25% wzrostu</div><div class="sc-desc">77 elementów · środkowy</div></div>
+  </div>
+  <div class="sc-chip">
+    <div class="sc-dot" style="background:var(--c-30)"></div>
+    <div><div class="sc-name">+30% wzrostu</div><div class="sc-desc">80 elementów · pesymistyczny</div></div>
   </div>
 </div>
  
-<!-- Answer cards -->
-<div class="answers-grid">
+<!-- Impact cards - P85 completion -->
+<div class="section-title">Kluczowy wpływ — data ukończenia P85 (zalecana data commitment)</div>
+<div class="impact-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px">
+  <div class="impact-card c0">
+    <div class="ic-label">Bazowy · 62 elem.</div>
+    <div class="ic-main">25 sty 2027</div>
+    <div class="ic-sub">17 sprintów · P85</div>
+    <div class="ic-delta" style="background:#e8f5e9;color:#1b5e20">punkt odniesienia</div>
+  </div>
+  <div class="impact-card c1">
+    <div class="ic-label">+20% · 74 elem.</div>
+    <div class="ic-main">8 mar 2027</div>
+    <div class="ic-sub">20 sprintów · P85</div>
+    <div class="ic-delta delta-warn">+6 tygodni ⚠</div>
+  </div>
+  <div class="impact-card c2">
+    <div class="ic-label">+25% · 77 elem.</div>
+    <div class="ic-main">8 mar 2027</div>
+    <div class="ic-sub">20 sprintów · P85</div>
+    <div class="ic-delta delta-warn">+6 tygodni ⚠</div>
+  </div>
+  <div class="impact-card c3">
+    <div class="ic-label">+30% · 80 elem.</div>
+    <div class="ic-main">22 mar 2027</div>
+    <div class="ic-sub">21 sprintów · P85</div>
+    <div class="ic-delta delta-danger">+8 tygodni ⛔</div>
+  </div>
+</div>
  
-  <div class="answer-card">
-    <div class="answer-q">Pytanie 1 — Kiedy ukończymy 62 elementy?</div>
-    <div class="answer-rows">
-      <div class="answer-row">
-        <span class="answer-pct pct-50">P50</span>
-        <div>
-          <div class="answer-main">28 grudnia 2026</div>
-          <div class="answer-sub">15 sprintów od startu · 50% szans na wcześniej</div>
-        </div>
-      </div>
-      <div class="answer-row">
-        <span class="answer-pct pct-85">P85</span>
-        <div>
-          <div class="answer-main">25 stycznia 2027</div>
-          <div class="answer-sub">17 sprintów od startu · zalecana data commitment</div>
-        </div>
-      </div>
-      <div class="answer-row">
-        <span class="answer-pct pct-95">P95</span>
-        <div>
-          <div class="answer-main">25 stycznia 2027</div>
-          <div class="answer-sub">17 sprintów · wysoka pewność dostarczenia</div>
-        </div>
-      </div>
+<!-- Summary comparison table -->
+<div class="summary-section">
+  <div class="section-title">Tabela porównawcza — ukończenie backlogu (liczba sprintów)</div>
+  <div class="compare-table">
+    <div class="ct-header">
+      <div class="ct-header-cell">Percentyl</div>
+      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-base);border-radius:2px"></div>Bazowy (62)</div>
+      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-20);border-radius:2px"></div>+20% (74)</div>
+      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-25);border-radius:2px"></div>+25% (77)</div>
+      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-30);border-radius:2px"></div>+30% (80)</div>
+    </div>
+    <div class="ct-row">
+      <div class="ct-cell label"><span class="pct-tag p50-bg">P50</span>50% pewności</div>
+      <div class="ct-cell"><div><div class="ct-val">S15</div><div class="ct-date">28 gru 2026</div></div></div>
+      <div class="ct-cell"><div><div class="ct-val">S18</div><div class="ct-date">8 lut 2027</div></div></div>
+      <div class="ct-cell"><div><div class="ct-val">S19</div><div class="ct-date">22 lut 2027</div></div></div>
+      <div class="ct-cell"><div><div class="ct-val">S19</div><div class="ct-date">22 lut 2027</div></div></div>
+    </div>
+    <div class="ct-row">
+      <div class="ct-cell label"><span class="pct-tag p85-bg">P85</span>Zalecana data</div>
+      <div class="ct-cell"><div><div class="ct-val">S17</div><div class="ct-date">25 sty 2027</div></div></div>
+      <div class="ct-cell"><div><div class="ct-val">S20</div><div class="ct-date">8 mar 2027</div></div></div>
+      <div class="ct-cell"><div><div class="ct-val">S20</div><div class="ct-date">8 mar 2027</div></div></div>
+      <div class="ct-cell"><div><div class="ct-val">S21</div><div class="ct-date">22 mar 2027</div></div></div>
+    </div>
+    <div class="ct-row">
+      <div class="ct-cell label"><span class="pct-tag p95-bg">P95</span>Wysoka pewność</div>
+      <div class="ct-cell"><div><div class="ct-val">S17</div><div class="ct-date">25 sty 2027</div></div></div>
+      <div class="ct-cell"><div><div class="ct-val">S20</div><div class="ct-date">8 mar 2027</div></div></div>
+      <div class="ct-cell"><div><div class="ct-val">S21</div><div class="ct-date">22 mar 2027</div></div></div>
+      <div class="ct-cell"><div><div class="ct-val">S22</div><div class="ct-date">5 kwi 2027</div></div></div>
     </div>
   </div>
+</div>
  
-  <div class="answer-card q2">
-    <div class="answer-q">Pytanie 2 — Ile elementów do końca sierpnia 2026?</div>
-    <div class="answer-rows">
-      <div class="answer-row">
-        <span class="answer-pct pct-mean">Śr.</span>
-        <div>
-          <div class="answer-main">~25 elementów</div>
-          <div class="answer-sub">Oczekiwana wartość po 6 sprintach</div>
-        </div>
-      </div>
-      <div class="answer-row">
-        <span class="answer-pct pct-50">P50</span>
-        <div>
-          <div class="answer-main">25 elementów</div>
-          <div class="answer-sub">50% szans na co najmniej tyle</div>
-        </div>
-      </div>
-      <div class="answer-row">
-        <span class="answer-pct pct-85">P85</span>
-        <div>
-          <div class="answer-main">29 elementów</div>
-          <div class="answer-sub">Optymistyczny wynik w 85% symulacji</div>
-        </div>
-      </div>
-      <div class="answer-row" style="background:#fef2f2;border:1px solid #fecaca">
-        <span class="answer-pct pct-95">0%</span>
-        <div>
-          <div class="answer-main" style="color:#dc2626">Wszystkich 62 do 31.08</div>
-          <div class="answer-sub" style="color:#dc2626">Niewykonalne przy aktualnym tempie</div>
-        </div>
-      </div>
+<!-- August scope delivery -->
+<div class="summary-section">
+  <div class="section-title">Tabela porównawcza — elementy dostarczone do 31 sierpnia 2026 (6 sprintów)</div>
+  <div class="compare-table">
+    <div class="ct-header">
+      <div class="ct-header-cell">Percentyl</div>
+      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-base);border-radius:2px"></div>Bazowy (62)</div>
+      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-20);border-radius:2px"></div>+20% (74)</div>
+      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-25);border-radius:2px"></div>+25% (77)</div>
+      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-30);border-radius:2px"></div>+30% (80)</div>
+    </div>
+    <div class="ct-row">
+      <div class="ct-cell label"><span class="pct-tag p50-bg">P50</span>Mediana</div>
+      <div class="ct-cell"><div class="ct-val">25 elem.</div></div>
+      <div class="ct-cell"><div class="ct-val">25 elem.</div></div>
+      <div class="ct-cell"><div class="ct-val">25 elem.</div></div>
+      <div class="ct-cell"><div class="ct-val">25 elem.</div></div>
+    </div>
+    <div class="ct-row">
+      <div class="ct-cell label"><span class="pct-tag p85-bg">P85</span>Optymistyczny</div>
+      <div class="ct-cell"><div class="ct-val">29 elem.</div></div>
+      <div class="ct-cell"><div class="ct-val">29 elem.</div></div>
+      <div class="ct-cell"><div class="ct-val">28 elem.</div></div>
+      <div class="ct-cell"><div class="ct-val">29 elem.</div></div>
+    </div>
+    <div class="ct-row">
+      <div class="ct-cell label"><span class="pct-tag p95-bg">P95</span>Bardzo optymist.</div>
+      <div class="ct-cell"><div class="ct-val">30 elem.</div></div>
+      <div class="ct-cell"><div class="ct-val">30 elem.</div></div>
+      <div class="ct-cell"><div class="ct-val">30 elem.</div></div>
+      <div class="ct-cell"><div class="ct-val">30 elem.</div></div>
+    </div>
+    <div class="ct-row" style="background:#fef2f2">
+      <div class="ct-cell label" style="color:#dc2626">Szansa na 100%</div>
+      <div class="ct-cell"><div class="ct-val" style="color:#dc2626">0%</div></div>
+      <div class="ct-cell"><div class="ct-val" style="color:#dc2626">0%</div></div>
+      <div class="ct-cell"><div class="ct-val" style="color:#dc2626">0%</div></div>
+      <div class="ct-cell"><div class="ct-val" style="color:#dc2626">0%</div></div>
     </div>
   </div>
- 
 </div>
  
-<!-- Charts -->
-<div class="charts-grid">
- 
+<!-- Charts row 1: Sprint completion grouped bar -->
+<div class="charts-row" style="grid-template-columns:1fr">
   <div class="chart-card">
-    <div class="chart-card-title">Rozkład — liczba sprintów do ukończenia backlogu</div>
-    <div class="chart-card-subtitle">Dystrybucja wyników 100 000 symulacji · linie P50 / P85 / P95</div>
-    <svg id="sprintChart"></svg>
+    <div class="chart-card-title">Liczba sprintów do ukończenia — porównanie P50 / P85 / P95</div>
+    <div class="chart-card-sub">Słupki pogrupowane per scenariusz · im wyżej, tym dłużej trwa · start: 1 czerwca 2026</div>
+    <svg id="sprintCompChart"></svg>
   </div>
- 
-  <div class="chart-card">
-    <div class="chart-card-title">Rozkład — elementy dostarczone do 31 sierpnia 2026</div>
-    <div class="chart-card-subtitle">6 sprintów roboczych (1 cze – 31 sie 2026)</div>
-    <svg id="augChart"></svg>
-  </div>
- 
 </div>
  
-<!-- Cumulative chart full width -->
-<div class="chart-card" style="margin-bottom:16px">
-  <div class="chart-card-title">Skumulowane prawdopodobieństwo ukończenia backlogu</div>
-  <div class="chart-card-subtitle">Oś X = numer sprintu od startu · oś Y = % symulacji zakończonych do tego sprintu</div>
-  <svg id="cumChart"></svg>
+<!-- Charts row 2: two charts side by side -->
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-card-title">Data ukończenia P85 — porównanie scenariuszy</div>
+    <div class="chart-card-sub">Zalecana data commitment dla każdego scenariusza wzrostu</div>
+    <svg id="dateChart"></svg>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-title">Rozkład liczby sprintów — wszystkie scenariusze</div>
+    <div class="chart-card-sub">Nakładające się rozkłady prawdopodobieństwa (skumulowane)</div>
+    <svg id="cumCompChart"></svg>
+  </div>
+</div>
+ 
+<!-- Aug items chart -->
+<div class="charts-row" style="grid-template-columns:1fr">
+  <div class="chart-card">
+    <div class="chart-card-title">Elementy dostarczone do 31 sierpnia 2026 — P50 / P85 / P95 per scenariusz</div>
+    <div class="chart-card-sub">Wyniki są zbliżone we wszystkich scenariuszach — tempo dostaw jest tym samym czynnikiem · backlog nie ma wpływu na sierpień</div>
+    <svg id="augCompChart"></svg>
+  </div>
 </div>
  
 <div class="footnote">
-  <strong>Metodologia:</strong> Symulacja Monte Carlo (n=100 000). Każda symulacja losuje tempo dostarczania z historycznych danych (sampling z zamianą) aż do osiągnięcia 62 elementów. Punkt odniesienia limitów: mediana historyczna.
-  Sprinty 2-tygodniowe, start 1 czerwca 2026. Do 31 sierpnia 2026 mieści się dokładnie <strong>6 pełnych sprintów</strong> (91 dni ÷ 14 = 6.5 → 6).
-  <strong>Zalecenie:</strong> Przy obecnym tempie realistyczna data ukończenia całego backlogu to <strong>styczeń 2027</strong> (P85). Rozważ zmniejszenie zakresu lub zwiększenie capacity jeśli wymagany termin to sierpień 2026.
+  <strong>Ważna obserwacja:</strong> Wyniki dla sierpnia 2026 są niemal identyczne we wszystkich scenariuszach (~25 elementów P50, ~29 P85).
+  Wynika to z tego, że <strong>przy 6 sprintach zespół nie zdąży wyczyścić nawet bazowego backlogu</strong> — wzrost zakresu nie zmienia wyniku sierpniowego.
+  Wzrost zakresu uderza wyłącznie w <strong>datę ukończenia całości</strong>: +20% przesuwa datę P85 o 6 tygodni, +30% o 8 tygodni.
+  Zalecenie: jeśli data jest kluczowa, rozważ ograniczenie zakresu do ≈40–45 elementów, co przy obecnym tempie da szansę ukończenia przed sierpniem.
 </div>
  
 <div class="tooltip" id="tooltip"></div>
  
 <script>
-const SPRINT_DIST = [{"sprint":11,"count":1,"cum":0.0},{"sprint":12,"count":474,"cum":0.5},{"sprint":13,"count":6205,"cum":6.7},{"sprint":14,"count":21544,"cum":28.2},{"sprint":15,"count":31742,"cum":60.0},{"sprint":16,"count":24312,"cum":84.3},{"sprint":17,"count":11471,"cum":95.7},{"sprint":18,"count":3410,"cum":99.2},{"sprint":19,"count":720,"cum":99.9},{"sprint":20,"count":105,"cum":100.0},{"sprint":21,"count":15,"cum":100.0},{"sprint":22,"count":1,"cum":100.0}];
-const AUG_DIST   = [{"items":12,"pct":0.01},{"items":13,"pct":0.02},{"items":14,"pct":0.05},{"items":15,"pct":0.12},{"items":16,"pct":0.3},{"items":17,"pct":0.66},{"items":18,"pct":1.3},{"items":19,"pct":2.27},{"items":20,"pct":3.84},{"items":21,"pct":5.45},{"items":22,"pct":7.62},{"items":23,"pct":9.39},{"items":24,"pct":11.16},{"items":25,"pct":11.98},{"items":26,"pct":11.62},{"items":27,"pct":10.53},{"items":28,"pct":8.63},{"items":29,"pct":6.48},{"items":30,"pct":4.23},{"items":31,"pct":2.44},{"items":32,"pct":1.22},{"items":33,"pct":0.53},{"items":34,"pct":0.12},{"items":35,"pct":0.03}];
-const TP = [5,4,4,5,6,4,2,3,2,5,6];
+const COLORS = { base:'#1d3557', c20:'#e07b39', c25:'#d44f6e', c30:'#7c3aed' };
+const SC = [
+  { key:'base', label:'Bazowy (62)', color:COLORS.base, backlog:62, p50s:15, p85s:17, p95s:17, p50d:'28 gru 2026', p85d:'25 sty 2027', p95d:'25 sty 2027', aug_p50:25, aug_p85:29, aug_p95:30 },
+  { key:'c20',  label:'+20% (74)',   color:COLORS.c20,  backlog:74, p50s:18, p85s:20, p95s:20, p50d:'8 lut 2027',  p85d:'8 mar 2027',  p95d:'8 mar 2027',  aug_p50:25, aug_p85:29, aug_p95:30 },
+  { key:'c25',  label:'+25% (77)',   color:COLORS.c25,  backlog:77, p50s:19, p85s:20, p95s:21, p50d:'22 lut 2027', p85d:'8 mar 2027',  p95d:'22 mar 2027', aug_p50:25, aug_p85:28, aug_p95:30 },
+  { key:'c30',  label:'+30% (80)',   color:COLORS.c30,  backlog:80, p50s:19, p85s:21, p95s:22, p50d:'22 lut 2027', p85d:'22 mar 2027', p95d:'5 kwi 2027',  aug_p50:25, aug_p85:29, aug_p95:30 },
+];
  
-const P50_S=15, P85_S=17, P95_S=17;
-const COL = { p50:'#2196f3', p85:'#f59e0b', p95:'#ef4444', bar:'#1d3557', aug:'#7c3aed' };
+const SPRINT_DISTS = {
+  base: [{"sprint":11,"count":1,"cum":0.0},{"sprint":12,"count":474,"cum":0.5},{"sprint":13,"count":6205,"cum":6.7},{"sprint":14,"count":21544,"cum":28.2},{"sprint":15,"count":31742,"cum":60.0},{"sprint":16,"count":24312,"cum":84.3},{"sprint":17,"count":11471,"cum":95.7},{"sprint":18,"count":3410,"cum":99.2},{"sprint":19,"count":720,"cum":99.9},{"sprint":20,"count":105,"cum":100.0}],
+  c20:  [{"sprint":14,"count":66,"cum":0.1},{"sprint":15,"count":1597,"cum":1.7},{"sprint":16,"count":9290,"cum":11.0},{"sprint":17,"count":22757,"cum":33.7},{"sprint":18,"count":28948,"cum":62.7},{"sprint":19,"count":21957,"cum":84.6},{"sprint":20,"count":10681,"cum":95.3},{"sprint":21,"count":3607,"cum":98.9},{"sprint":22,"count":904,"cum":99.8},{"sprint":23,"count":174,"cum":100.0}],
+  c25:  [{"sprint":14,"count":4,"cum":0.0},{"sprint":15,"count":237,"cum":0.2},{"sprint":16,"count":3173,"cum":3.4},{"sprint":17,"count":13173,"cum":16.6},{"sprint":18,"count":25530,"cum":42.1},{"sprint":19,"count":27661,"cum":69.8},{"sprint":20,"count":18695,"cum":88.5},{"sprint":21,"count":8195,"cum":96.7},{"sprint":22,"count":2581,"cum":99.2},{"sprint":23,"count":615,"cum":99.9}],
+  c30:  [{"sprint":15,"count":19,"cum":0.0},{"sprint":16,"count":689,"cum":0.7},{"sprint":17,"count":5517,"cum":6.2},{"sprint":18,"count":17003,"cum":23.2},{"sprint":19,"count":27090,"cum":50.3},{"sprint":20,"count":25246,"cum":75.6},{"sprint":21,"count":15587,"cum":91.2},{"sprint":22,"count":6428,"cum":97.6},{"sprint":23,"count":1884,"cum":99.5},{"sprint":24,"count":446,"cum":99.9}],
+};
  
-// ── TOOLTIP ──────────────────────────────────────────────────
 const tt = document.getElementById('tooltip');
-function showTT(ev, html) { tt.innerHTML=html; tt.style.opacity='1'; moveTT(ev); }
-function moveTT(ev) {
-  let x=ev.clientX+14, y=ev.clientY-10;
-  if (x+200>window.innerWidth) x=ev.clientX-210;
-  tt.style.left=x+'px'; tt.style.top=y+'px';
-}
-function hideTT() { tt.style.opacity='0'; }
+function showTT(ev,html){tt.innerHTML=html;tt.style.opacity='1';moveTT(ev);}
+function moveTT(ev){let x=ev.clientX+14,y=ev.clientY-10;if(x+220>window.innerWidth)x=ev.clientX-230;tt.style.left=x+'px';tt.style.top=y+'px';}
+function hideTT(){tt.style.opacity='0';}
  
-// ── TP DOTS ──────────────────────────────────────────────────
-const maxTP = Math.max(...TP);
-const tpContainer = document.getElementById('tpDots');
-TP.forEach((v, i) => {
-  const wrap = document.createElement('div'); wrap.className='tp-dot-wrap';
-  const bar = document.createElement('div'); bar.className='tp-bar';
-  bar.style.height = (v/maxTP*44)+'px';
-  const num = document.createElement('div'); num.className='tp-num';
-  num.textContent = v;
-  wrap.appendChild(bar); wrap.appendChild(num);
-  tpContainer.appendChild(wrap);
-});
- 
-// ── SPRINT DISTRIBUTION CHART ────────────────────────────────
-(function() {
-  const el = document.getElementById('sprintChart');
-  const W = el.parentElement.clientWidth - 40;
-  const H = 200;
-  const m = {top:14, right:14, bottom:36, left:48};
+// ── SPRINT COMPARISON GROUPED BAR ─────────────────────────────
+(function(){
+  const el=document.getElementById('sprintCompChart');
+  const W=el.parentElement.clientWidth-40, H=220;
+  const m={top:14,right:20,bottom:40,left:46};
   const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
+  const svg=d3.select(el).attr('width',W).attr('height',H);
+  const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
  
-  const svg = d3.select(el).attr('width',W).attr('height',H);
-  const g   = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+  const pcts=['P50','P85','P95'];
+  const vals=[
+    [15,17,17],
+    [18,20,20],
+    [19,20,21],
+    [19,21,22],
+  ];
+  const pctColors={'P50':'#2196f3','P85':'#f59e0b','P95':'#ef4444'};
  
-  const xScale = d3.scaleBand().domain(SPRINT_DIST.map(d=>d.sprint)).range([0,iW]).padding(0.18);
-  const yMax   = Math.max(...SPRINT_DIST.map(d=>d.count/1000));
-  const yScale = d3.scaleLinear().domain([0,yMax]).range([iH,0]).nice();
+  const xOuter=d3.scaleBand().domain(SC.map(s=>s.label)).range([0,iW]).padding(0.28);
+  const xInner=d3.scaleBand().domain(pcts).range([0,xOuter.bandwidth()]).padding(0.1);
+  const yScale=d3.scaleLinear().domain([0,25]).range([iH,0]).nice();
  
-  g.selectAll('.gl').data(yScale.ticks(4)).enter().append('line')
+  g.selectAll('.gl').data(yScale.ticks(5)).enter().append('line')
     .attr('x1',0).attr('x2',iW).attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
     .attr('stroke','#f0ede9').attr('stroke-width',1);
  
-  // Bars colored by percentile
-  g.selectAll('.bar').data(SPRINT_DIST).enter().append('rect')
-    .attr('x',d=>xScale(d.sprint)).attr('y',d=>yScale(d.count/1000))
-    .attr('width',xScale.bandwidth()).attr('height',d=>iH-yScale(d.count/1000))
-    .attr('rx',3)
-    .attr('fill', d => {
-      if (d.sprint <= P50_S) return COL.p50;
-      if (d.sprint <= P85_S) return COL.p85;
-      return COL.p95;
-    })
-    .attr('fill-opacity',0.82)
-    .style('cursor','pointer')
-    .on('mousemove', (ev,d) => showTT(ev, `Sprint ${d.sprint}: ${(d.count/1000).toFixed(1)}k symulacji (${d.cum}% skumul.)`))
-    .on('mouseout', hideTT);
- 
-  // P-lines
-  [P50_S, P85_S].forEach((s,i) => {
-    const cols=[COL.p50, COL.p85, COL.p95];
-    const lbls=['P50','P85','P95'];
-    const x = xScale(s)+xScale.bandwidth()/2;
-    g.append('line').attr('x1',x).attr('x2',x).attr('y1',0).attr('y2',iH)
-      .attr('stroke',cols[i]).attr('stroke-width',2).attr('stroke-dasharray','5 3').attr('opacity',0.9);
-    g.append('text').attr('x',x+3).attr('y',10).attr('fill',cols[i])
-      .attr('font-size','10px').attr('font-weight','700').attr('font-family','DM Mono, monospace').text(lbls[i]);
+  SC.forEach((sc,si)=>{
+    pcts.forEach((p,pi)=>{
+      const v=vals[si][pi];
+      const bx=xOuter(sc.label)+xInner(p);
+      const by=yScale(v), bh=iH-yScale(v);
+      g.append('rect').attr('x',bx).attr('y',by).attr('width',xInner.bandwidth()).attr('height',bh)
+        .attr('rx',3).attr('fill',pctColors[p]).attr('fill-opacity',0.85)
+        .style('cursor','pointer')
+        .on('mousemove',(ev)=>showTT(ev,`${sc.label} · ${p} = ${v} sprintów`))
+        .on('mouseout',hideTT);
+      if(bh>14){
+        g.append('text').attr('x',bx+xInner.bandwidth()/2).attr('y',by-4)
+          .attr('text-anchor','middle').attr('fill',pctColors[p])
+          .attr('font-size','10px').attr('font-weight','700').attr('font-family','DM Mono, monospace').text(v);
+      }
+    });
   });
  
   g.append('g').attr('transform',`translate(0,${iH})`)
-    .call(d3.axisBottom(xScale).tickFormat(d=>`S${d}`))
+    .call(d3.axisBottom(xOuter).tickSize(0))
+    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('text').attr('fill','#7a7470').attr('font-size','11px').attr('dy','1.2em');});
+ 
+  g.append('g').call(d3.axisLeft(yScale).ticks(5).tickFormat(d=>'S'+d))
     .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
  
-  g.append('g')
-    .call(d3.axisLeft(yScale).ticks(4).tickFormat(d=>d+'k'))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
+  // P legend
+  const lx=iW-200;
+  pcts.forEach((p,i)=>{
+    g.append('rect').attr('x',lx+i*66).attr('y',-12).attr('width',12).attr('height',12).attr('rx',2).attr('fill',pctColors[p]);
+    g.append('text').attr('x',lx+i*66+15).attr('y',-2).attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace').text(p);
+  });
 })();
  
-// ── AUG DISTRIBUTION CHART ───────────────────────────────────
-(function() {
-  const el = document.getElementById('augChart');
-  const W = el.parentElement.clientWidth - 40;
-  const H = 200;
-  const m = {top:14, right:14, bottom:36, left:48};
+// ── DATE CHART (P85 horizontal bar) ──────────────────────────
+(function(){
+  const el=document.getElementById('dateChart');
+  const W=el.parentElement.clientWidth-40, H=180;
+  const m={top:10,right:20,bottom:14,left:14};
   const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
+  const svg=d3.select(el).attr('width',W).attr('height',H);
+  const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
  
-  const svg = d3.select(el).attr('width',W).attr('height',H);
-  const g   = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+  const startMs=new Date('2026-06-01').getTime();
+  const dates={base:new Date('2027-01-25'),c20:new Date('2027-03-08'),c25:new Date('2027-03-08'),c30:new Date('2027-03-22')};
+  const maxMs=new Date('2027-05-01').getTime();
  
-  const xScale = d3.scaleBand().domain(AUG_DIST.map(d=>d.items)).range([0,iW]).padding(0.12);
-  const yMax   = Math.max(...AUG_DIST.map(d=>d.pct));
-  const yScale = d3.scaleLinear().domain([0,yMax]).range([iH,0]).nice();
+  const yBand=d3.scaleBand().domain(SC.map(s=>s.key)).range([0,iH]).padding(0.3);
+  const xScale=d3.scaleLinear().domain([startMs,maxMs]).range([80,iW]);
  
-  // Cumulative for coloring
-  let cum=0;
-  const cumMap={};
-  AUG_DIST.forEach(d=>{ cum+=d.pct; cumMap[d.items]=cum; });
+  SC.forEach(sc=>{
+    const d=dates[sc.key];
+    const barW=xScale(d.getTime())-xScale(startMs);
+    const y=yBand(sc.key);
+    const h=yBand.bandwidth();
  
-  g.selectAll('.gl').data(yScale.ticks(4)).enter().append('line')
-    .attr('x1',0).attr('x2',iW).attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
-    .attr('stroke','#f0ede9').attr('stroke-width',1);
+    // background track
+    g.append('rect').attr('x',80).attr('y',y).attr('width',iW-80).attr('height',h)
+      .attr('rx',4).attr('fill','#f7f5f2');
  
-  g.selectAll('.bar').data(AUG_DIST).enter().append('rect')
-    .attr('x',d=>xScale(d.items)).attr('y',d=>yScale(d.pct))
-    .attr('width',xScale.bandwidth()).attr('height',d=>iH-yScale(d.pct))
-    .attr('rx',2).attr('fill',COL.aug).attr('fill-opacity',0.75)
-    .style('cursor','pointer')
-    .on('mousemove',(ev,d)=>showTT(ev,`${d.items} elem.: ${d.pct}% | skumul. ${cumMap[d.items].toFixed(1)}%`))
-    .on('mouseout',hideTT);
+    // bar
+    g.append('rect').attr('x',80).attr('y',y).attr('width',barW).attr('height',h)
+      .attr('rx',4).attr('fill',sc.color).attr('fill-opacity',0.85);
  
-  // P50=25, P85=29
-  [{v:25,lbl:'P50',col:COL.p50},{v:29,lbl:'P85',col:COL.p85}].forEach(p => {
-    const x = xScale(p.v)+xScale.bandwidth()/2;
-    g.append('line').attr('x1',x).attr('x2',x).attr('y1',0).attr('y2',iH)
-      .attr('stroke',p.col).attr('stroke-width',2).attr('stroke-dasharray','5 3').attr('opacity',0.9);
-    g.append('text').attr('x',x+3).attr('y',10).attr('fill',p.col)
-      .attr('font-size','10px').attr('font-weight','700').attr('font-family','DM Mono, monospace').text(p.lbl);
+    // label left
+    g.append('text').attr('x',76).attr('y',y+h/2+4).attr('text-anchor','end')
+      .attr('fill','#7a7470').attr('font-size','10px').attr('font-weight','600').text(sc.label);
+ 
+    // date label
+    const months=['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+    const dateLabel=`${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    g.append('text').attr('x',80+barW+5).attr('y',y+h/2+4)
+      .attr('fill',sc.color).attr('font-size','10px').attr('font-weight','700')
+      .attr('font-family','DM Mono, monospace').text(dateLabel);
   });
  
-  g.append('g').attr('transform',`translate(0,${iH})`)
-    .call(d3.axisBottom(xScale).tickValues(AUG_DIST.filter((_,i)=>i%3===0).map(d=>d.items)))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
- 
-  g.append('g')
-    .call(d3.axisLeft(yScale).ticks(4).tickFormat(d=>d+'%'))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
+  // month gridlines
+  const refDates=[new Date('2026-09-01'),new Date('2026-12-01'),new Date('2027-03-01')];
+  refDates.forEach(d=>{
+    const x=xScale(d.getTime());
+    g.append('line').attr('x1',x).attr('x2',x).attr('y1',0).attr('y2',iH)
+      .attr('stroke','#e8e4de').attr('stroke-width',1).attr('stroke-dasharray','3 3');
+    const months=['','','sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+    g.append('text').attr('x',x+3).attr('y',iH+12).attr('fill','#b0aba5').attr('font-size','9px')
+      .attr('font-family','DM Mono, monospace').text(`${months[d.getMonth()]} ${d.getFullYear()}`);
+  });
 })();
  
-// ── CUMULATIVE CHART ─────────────────────────────────────────
-(function() {
-  const el = document.getElementById('cumChart');
-  const W = el.parentElement.clientWidth - 40;
-  const H = 200;
-  const m = {top:16, right:60, bottom:36, left:52};
+// ── CUMULATIVE COMPARISON ────────────────────────────────────
+(function(){
+  const el=document.getElementById('cumCompChart');
+  const W=el.parentElement.clientWidth-40, H=200;
+  const m={top:14,right:50,bottom:36,left:44};
   const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
+  const svg=d3.select(el).attr('width',W).attr('height',H);
+  const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
  
-  const svg = d3.select(el).attr('width',W).attr('height',H);
-  const g   = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
- 
-  const xScale = d3.scaleLinear().domain([11,22]).range([0,iW]);
-  const yScale = d3.scaleLinear().domain([0,100]).range([iH,0]);
- 
-  // Shaded area under curve
-  g.append('path')
-    .datum(SPRINT_DIST)
-    .attr('fill','#1d3557').attr('fill-opacity',0.07)
-    .attr('d', d3.area().x(d=>xScale(d.sprint)).y0(iH).y1(d=>yScale(d.cum)).curve(d3.curveMonotoneX));
+  const xScale=d3.scaleLinear().domain([10,26]).range([0,iW]);
+  const yScale=d3.scaleLinear().domain([0,100]).range([iH,0]);
  
   g.selectAll('.gl').data([25,50,75,85,95]).enter().append('line')
     .attr('x1',0).attr('x2',iW).attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
     .attr('stroke','#f0ede9').attr('stroke-width',1);
  
-  // Curve
-  g.append('path')
-    .datum(SPRINT_DIST)
-    .attr('fill','none').attr('stroke','#1d3557').attr('stroke-width',2.5)
-    .attr('d', d3.line().x(d=>xScale(d.sprint)).y(d=>yScale(d.cum)).curve(d3.curveMonotoneX));
+  // 85% reference line
+  g.append('line').attr('x1',0).attr('x2',iW).attr('y1',yScale(85)).attr('y2',yScale(85))
+    .attr('stroke','#f59e0b').attr('stroke-width',1.5).attr('stroke-dasharray','5 3').attr('opacity',0.7);
+  g.append('text').attr('x',iW+2).attr('y',yScale(85)+4).attr('fill','#f59e0b')
+    .attr('font-size','9px').attr('font-weight','700').attr('font-family','DM Mono, monospace').text('P85');
  
-  // Percentile markers
-  [{s:P50_S,p:60.0,lbl:'P50',col:COL.p50},{s:P85_S,p:84.3,lbl:'P85',col:COL.p85},{s:P95_S,p:95.7,lbl:'P95',col:COL.p95}].forEach(p => {
-    const cx=xScale(p.s), cy=yScale(p.p);
-    g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',6)
-      .attr('fill',p.col).attr('stroke','#fff').attr('stroke-width',2);
-    g.append('line').attr('x1',cx).attr('x2',iW+8).attr('y1',cy).attr('y2',cy)
-      .attr('stroke',p.col).attr('stroke-width',1).attr('stroke-dasharray','3 3').attr('opacity',0.6);
-    g.append('text').attr('x',iW+11).attr('y',cy+4)
-      .attr('fill',p.col).attr('font-size','10px').attr('font-weight','700').attr('font-family','DM Mono, monospace')
-      .text(p.lbl);
+  Object.entries(SPRINT_DISTS).forEach(([key,dist])=>{
+    const sc=SC.find(s=>s.key===key);
+    g.append('path').datum(dist)
+      .attr('fill','none').attr('stroke',sc.color).attr('stroke-width',2.2).attr('opacity',0.9)
+      .attr('d',d3.line().x(d=>xScale(d.sprint)).y(d=>yScale(d.cum)).curve(d3.curveMonotoneX));
+    // last point label
+    const last=dist[dist.length-2];
+    g.append('circle').attr('cx',xScale(last.sprint)).attr('cy',yScale(last.cum))
+      .attr('r',4).attr('fill',sc.color).attr('stroke','#fff').attr('stroke-width',1.5);
   });
  
-  // Dots
-  g.selectAll('.dot').data(SPRINT_DIST).enter().append('circle')
-    .attr('cx',d=>xScale(d.sprint)).attr('cy',d=>yScale(d.cum)).attr('r',4)
-    .attr('fill','#1d3557').attr('stroke','#fff').attr('stroke-width',1.5)
-    .style('cursor','pointer')
-    .on('mousemove',(ev,d)=>showTT(ev,`Sprint ${d.sprint}: ${d.cum}% symulacji ukończonych`))
-    .on('mouseout',hideTT);
+  // Legend
+  SC.forEach((sc,i)=>{
+    g.append('line').attr('x1',0).attr('x2',18).attr('y1',6+i*14).attr('y2',6+i*14)
+      .attr('stroke',sc.color).attr('stroke-width',2.5);
+    g.append('text').attr('x',21).attr('y',10+i*14).attr('fill',sc.color)
+      .attr('font-size','9px').attr('font-weight','600').text(sc.label);
+  });
  
   g.append('g').attr('transform',`translate(0,${iH})`)
-    .call(d3.axisBottom(xScale).ticks(10).tickFormat(d=>`S${d}`))
+    .call(d3.axisBottom(xScale).ticks(8).tickFormat(d=>`S${d}`))
+    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
+  g.append('g').call(d3.axisLeft(yScale).ticks(5).tickFormat(d=>d+'%'))
+    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
+})();
+ 
+// ── AUG COMPARISON GROUPED BAR ────────────────────────────────
+(function(){
+  const el=document.getElementById('augCompChart');
+  const W=el.parentElement.clientWidth-40, H=200;
+  const m={top:14,right:20,bottom:40,left:46};
+  const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
+  const svg=d3.select(el).attr('width',W).attr('height',H);
+  const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+ 
+  const pcts=['P50','P85','P95'];
+  const pctColors={'P50':'#2196f3','P85':'#f59e0b','P95':'#ef4444'};
+  const augVals=[[25,29,30],[25,29,30],[25,28,30],[25,29,30]];
+ 
+  const xOuter=d3.scaleBand().domain(SC.map(s=>s.label)).range([0,iW]).padding(0.28);
+  const xInner=d3.scaleBand().domain(pcts).range([0,xOuter.bandwidth()]).padding(0.1);
+  const yScale=d3.scaleLinear().domain([0,40]).range([iH,0]).nice();
+ 
+  // Backlog reference line
+  g.append('line').attr('x1',0).attr('x2',iW).attr('y1',yScale(0)).attr('y2',yScale(0))
+    .attr('stroke','#e8e4de').attr('stroke-width',1);
+ 
+  g.selectAll('.gl').data([10,20,30]).enter().append('line')
+    .attr('x1',0).attr('x2',iW).attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
+    .attr('stroke','#f0ede9').attr('stroke-width',1);
+ 
+  SC.forEach((sc,si)=>{
+    pcts.forEach((p,pi)=>{
+      const v=augVals[si][pi];
+      const bx=xOuter(sc.label)+xInner(p);
+      const by=yScale(v), bh=iH-yScale(v);
+      g.append('rect').attr('x',bx).attr('y',by).attr('width',xInner.bandwidth()).attr('height',bh)
+        .attr('rx',3).attr('fill',pctColors[p]).attr('fill-opacity',0.82)
+        .style('cursor','pointer')
+        .on('mousemove',(ev)=>showTT(ev,`${sc.label} · ${p} = ${v} elementów do 31 sie`))
+        .on('mouseout',hideTT);
+      g.append('text').attr('x',bx+xInner.bandwidth()/2).attr('y',by-4)
+        .attr('text-anchor','middle').attr('fill',pctColors[p])
+        .attr('font-size','10px').attr('font-weight','700').attr('font-family','DM Mono, monospace').text(v);
+    });
+  });
+ 
+  // Note: all scenarios deliver 0 full backlog
+  g.append('rect').attr('x',0).attr('y',0).attr('width',iW).attr('height',4).attr('fill','#fde8ed').attr('opacity',0.6);
+  g.append('text').attr('x',4).attr('y',13).attr('fill','#be2b50').attr('font-size','9px').attr('font-weight','700').text('⛔  Żaden scenariusz nie realizuje pełnego backlogu do 31.08');
+ 
+  g.append('g').attr('transform',`translate(0,${iH})`)
+    .call(d3.axisBottom(xOuter).tickSize(0))
+    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('text').attr('fill','#7a7470').attr('font-size','11px').attr('dy','1.2em');});
+  g.append('g').call(d3.axisLeft(yScale).ticks(4).tickFormat(d=>d+' el.'))
     .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
  
-  g.append('g')
-    .call(d3.axisLeft(yScale).ticks(5).tickFormat(d=>d+'%'))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
+  const lx=iW-200;
+  pcts.forEach((p,i)=>{
+    g.append('rect').attr('x',lx+i*66).attr('y',-12).attr('width',12).attr('height',12).attr('rx',2).attr('fill',pctColors[p]);
+    g.append('text').attr('x',lx+i*66+15).attr('y',-2).attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace').text(p);
+  });
 })();
 </script>
 </body>
