@@ -8,48 +8,38 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:#f4f6f9; color:#1a1f2e; font-family:'Segoe UI',system-ui,sans-serif; padding:28px; }
- 
 h1 { font-size:1.3rem; font-weight:700; color:#111827; }
 .subtitle { font-size:0.82rem; color:#6b7280; margin-top:3px; }
- 
 .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
- 
-/* Stats */
 .stats-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
-.stat-card {
-  background:#fff; border:1px solid #e5e7eb; border-radius:10px;
-  padding:12px 20px; box-shadow:0 1px 3px rgba(0,0,0,0.06); min-width:120px;
-}
+.stat-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:12px 20px; box-shadow:0 1px 3px rgba(0,0,0,0.06); min-width:120px; }
 .stat-label { font-size:0.7rem; color:#6b7280; text-transform:uppercase; letter-spacing:0.06em; }
 .stat-value { font-size:1.45rem; font-weight:700; margin-top:2px; }
- 
-/* Chart containers */
-.chart-wrap {
-  background:#fff; border:1px solid #e5e7eb; border-radius:12px;
-  padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:18px;
-  position:relative;
-}
+.chart-wrap { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:18px; position:relative; }
 .chart-title { font-size:0.88rem; font-weight:700; color:#111827; margin-bottom:4px; }
 .chart-desc { font-size:0.75rem; color:#9ca3af; margin-bottom:16px; }
- 
-/* Legend */
-.legend { display:flex; gap:18px; flex-wrap:wrap; margin-top:14px; }
-.leg-item { display:flex; align-items:center; gap:6px; font-size:0.75rem; color:#6b7280; }
-.leg-line { width:24px; height:3px; border-radius:2px; }
-.leg-dash { width:24px; height:0; border-top:2px dashed; }
- 
-/* Tooltip */
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid #f3f4f6; }
+.leg-item { display:flex; align-items:center; gap:7px; font-size:0.74rem; color:#4b5563; }
+.leg-line { width:22px; height:3px; border-radius:2px; flex-shrink:0; }
 .tooltip {
   position:fixed; background:#1c2128; color:#e6edf3;
   border-radius:8px; padding:10px 14px; font-size:0.76rem;
   pointer-events:none; opacity:0; transition:opacity 0.1s;
   z-index:100; white-space:nowrap; box-shadow:0 4px 16px rgba(0,0,0,0.3);
+  min-width:210px;
 }
-.tooltip strong { color:#fff; display:block; margin-bottom:3px; }
-.tooltip .tt-row { display:flex; justify-content:space-between; gap:16px; }
+.tooltip strong { color:#fff; display:block; margin-bottom:5px; font-size:0.82rem; }
+.tt-row { display:flex; justify-content:space-between; gap:20px; margin-bottom:2px; }
+.signal-box { margin-top:6px; padding:5px 8px; border-radius:5px; font-weight:700; font-size:0.74rem; }
  
-/* Signal markers */
-.signal { fill:#dc2626; }
+/* Signal legend panel */
+.signal-legend {
+  display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;
+  background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+  padding:14px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.06);
+}
+.sig-item { display:flex; align-items:center; gap:8px; font-size:0.76rem; color:#374151; }
+.sig-icon { width:26px; height:26px; flex-shrink:0; }
 </style>
 </head>
 <body>
@@ -57,22 +47,46 @@ h1 { font-size:1.3rem; font-weight:700; color:#111827; }
 <div class="header">
   <div>
     <h1>XMR Chart — Cycle Time</h1>
-    <div class="subtitle">Sekwencja czasów realizacji · dane z pliku Team_Cycle_Time_for_XMR</div>
+    <div class="subtitle">Sekwencja czasów realizacji · 4 poziomy sygnałów · n=30 zadań</div>
+  </div>
+</div>
+ 
+<!-- Signal legend -->
+<div class="signal-legend">
+  <div class="sig-item">
+    <svg class="sig-icon" viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#dc2626"/><text x="13" y="18" text-anchor="middle" font-size="16" font-weight="900" fill="white">!</text></svg>
+    <div><strong style="color:#dc2626">Silny sygnał</strong><br><span style="color:#6b7280;font-size:0.7rem">Wartość poza UNPL/LNPL lub URL/LRL</span></div>
+  </div>
+  <div class="sig-item">
+    <svg class="sig-icon" viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#f59e0b"/><text x="13" y="19" text-anchor="middle" font-size="13" font-weight="900" fill="white">⚙</text></svg>
+    <div><strong style="color:#f59e0b">Umiarkowany sygnał</strong><br><span style="color:#6b7280;font-size:0.7rem">Wartość poza 2/3 limitu (strefa ostrzegawcza)</span></div>
+  </div>
+  <div class="sig-item">
+    <svg class="sig-icon" viewBox="0 0 26 26"><polygon points="13,2 25,24 1,24" fill="#fb923c"/><text x="13" y="21" text-anchor="middle" font-size="12" font-weight="900" fill="white">!</text></svg>
+    <div><strong style="color:#fb923c">Słaby sygnał</strong><br><span style="color:#6b7280;font-size:0.7rem">Wartość poza 1/3 limitu (strefa uwagi)</span></div>
+  </div>
+  <div class="sig-item">
+    <svg class="sig-icon" viewBox="0 0 26 26"><rect x="1" y="1" width="24" height="24" rx="5" fill="#16a34a"/><line x1="6" y1="13" x2="11" y2="18" stroke="white" stroke-width="2.5" stroke-linecap="round"/><line x1="11" y1="18" x2="20" y2="8" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+    <div><strong style="color:#16a34a">Słaby trend</strong><br><span style="color:#6b7280;font-size:0.7rem">8+ kolejnych wartości po jednej stronie średniej</span></div>
+  </div>
+  <div class="sig-item">
+    <svg class="sig-icon" viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#2563eb"/></svg>
+    <div><strong style="color:#2563eb">W kontroli</strong><br><span style="color:#6b7280;font-size:0.7rem">Proces stabilny, brak sygnału</span></div>
   </div>
 </div>
  
 <div class="stats-row" id="statsRow"></div>
  
 <div class="chart-wrap">
-  <div class="chart-title">X Chart — Indywidualne czasy realizacji</div>
-  <div class="chart-desc">Każdy punkt = jedno zadanie posortowane wg daty zamknięcia. Sygnały (punkty poza UNPL) oznaczone czerwono.</div>
+  <div class="chart-title">X Chart — Indywidualne czasy realizacji (Cycle Time)</div>
+  <div class="chart-desc">Każdy punkt = jedno zadanie wg daty zamknięcia · strefy 1/3 i 2/3 UNPL/LNPL zaznaczone cieniowaniem</div>
   <svg id="xChart"></svg>
   <div class="legend" id="xLegend"></div>
 </div>
  
 <div class="chart-wrap">
   <div class="chart-title">MR Chart — Moving Range (ruchomy zakres)</div>
-  <div class="chart-desc">Wartość bezwzględna różnicy między kolejnymi pomiarami. Sygnały powyżej URL<sub>MR</sub> oznaczone czerwono.</div>
+  <div class="chart-desc">Różnica bezwzględna między kolejnymi pomiarami · strefy 1/3 i 2/3 URL(MR) zaznaczone cieniowaniem</div>
   <svg id="mrChart"></svg>
   <div class="legend" id="mrLegend"></div>
 </div>
@@ -80,164 +94,307 @@ h1 { font-size:1.3rem; font-weight:700; color:#111827; }
 <div class="tooltip" id="tooltip"></div>
  
 <script>
-const RAW = {"data":[{"id":1,"closed":"2024-01-05","ct":38,"mr":null},{"id":2,"closed":"2024-01-11","ct":24,"mr":14},{"id":3,"closed":"2024-01-16","ct":14,"mr":10},{"id":4,"closed":"2024-01-17","ct":9,"mr":5},{"id":5,"closed":"2024-01-22","ct":4,"mr":5},{"id":6,"closed":"2024-01-26","ct":25,"mr":21},{"id":7,"closed":"2024-01-29","ct":19,"mr":6},{"id":8,"closed":"2024-02-06","ct":51,"mr":32},{"id":9,"closed":"2024-02-12","ct":48,"mr":3},{"id":10,"closed":"2024-02-15","ct":15,"mr":33},{"id":11,"closed":"2024-02-17","ct":22,"mr":7},{"id":12,"closed":"2024-02-18","ct":42,"mr":20},{"id":13,"closed":"2024-02-19","ct":17,"mr":25},{"id":14,"closed":"2024-02-21","ct":7,"mr":10},{"id":15,"closed":"2024-02-28","ct":5,"mr":2},{"id":16,"closed":"2024-03-12","ct":20,"mr":15},{"id":17,"closed":"2024-03-14","ct":63,"mr":43},{"id":18,"closed":"2024-03-19","ct":6,"mr":57},{"id":19,"closed":"2024-03-20","ct":56,"mr":50},{"id":20,"closed":"2024-03-22","ct":24,"mr":32},{"id":21,"closed":"2024-03-22","ct":22,"mr":2},{"id":22,"closed":"2024-03-26","ct":50,"mr":28},{"id":23,"closed":"2024-03-27","ct":8,"mr":42},{"id":24,"closed":"2024-03-28","ct":2,"mr":6},{"id":25,"closed":"2024-03-29","ct":3,"mr":1},{"id":26,"closed":"2024-03-30","ct":8,"mr":5},{"id":27,"closed":"2024-04-01","ct":36,"mr":28},{"id":28,"closed":"2024-04-02","ct":27,"mr":9},{"id":29,"closed":"2024-04-09","ct":29,"mr":2},{"id":30,"closed":"2024-04-09","ct":20,"mr":9}],"avg_ct":23.8,"avg_mr":18.0,"unpl":71.68,"lnpl":-24.08};
- 
-const data = RAW.data;
-const AVG_CT  = RAW.avg_ct;
-const AVG_MR  = RAW.avg_mr;
-const UNPL    = RAW.unpl;
-const LNPL    = Math.max(0, RAW.lnpl); // floor at 0 for CT
-const URL_MR  = 3.267 * AVG_MR;        // Upper limit for MR chart
- 
-// ── STATS CARDS ───────────────────────────────────────────────
-const statsRow = document.getElementById('statsRow');
-const statsDef = [
-  { label:'Zadania (n)', value: data.length,            color:'#111827' },
-  { label:'Średni CT',   value: AVG_CT.toFixed(1)+' dni', color:'#2563eb' },
-  { label:'UNPL',        value: UNPL.toFixed(1)+' dni', color:'#dc2626' },
-  { label:'LNPL',        value: LNPL.toFixed(1)+' dni', color:'#16a34a' },
-  { label:'Śr. MR',      value: AVG_MR.toFixed(1)+' dni', color:'#7c3aed' },
-  { label:'URL(MR)',     value: URL_MR.toFixed(1)+' dni', color:'#ea580c' },
+// ── DATA & LIMITS ─────────────────────────────────────────────
+const data = [
+  {id:1,  closed:"2024-01-05", ct:38, mr:null},
+  {id:2,  closed:"2024-01-11", ct:24, mr:14},
+  {id:3,  closed:"2024-01-16", ct:14, mr:10},
+  {id:4,  closed:"2024-01-17", ct:9,  mr:5},
+  {id:5,  closed:"2024-01-22", ct:4,  mr:5},
+  {id:6,  closed:"2024-01-26", ct:25, mr:21},
+  {id:7,  closed:"2024-01-29", ct:19, mr:6},
+  {id:8,  closed:"2024-02-06", ct:51, mr:32},
+  {id:9,  closed:"2024-02-12", ct:48, mr:3},
+  {id:10, closed:"2024-02-15", ct:15, mr:33},
+  {id:11, closed:"2024-02-17", ct:22, mr:7},
+  {id:12, closed:"2024-02-18", ct:42, mr:20},
+  {id:13, closed:"2024-02-19", ct:17, mr:25},
+  {id:14, closed:"2024-02-21", ct:7,  mr:10},
+  {id:15, closed:"2024-02-28", ct:5,  mr:2},
+  {id:16, closed:"2024-03-12", ct:20, mr:15},
+  {id:17, closed:"2024-03-14", ct:63, mr:43},
+  {id:18, closed:"2024-03-19", ct:6,  mr:57},
+  {id:19, closed:"2024-03-20", ct:56, mr:50},
+  {id:20, closed:"2024-03-22", ct:24, mr:32},
+  {id:21, closed:"2024-03-22", ct:22, mr:2},
+  {id:22, closed:"2024-03-26", ct:50, mr:28},
+  {id:23, closed:"2024-03-27", ct:8,  mr:42},
+  {id:24, closed:"2024-03-28", ct:2,  mr:6},
+  {id:25, closed:"2024-03-29", ct:3,  mr:1},
+  {id:26, closed:"2024-03-30", ct:8,  mr:5},
+  {id:27, closed:"2024-04-01", ct:36, mr:28},
+  {id:28, closed:"2024-04-02", ct:27, mr:9},
+  {id:29, closed:"2024-04-09", ct:29, mr:2},
+  {id:30, closed:"2024-04-09", ct:20, mr:9}
 ];
-statsDef.forEach(s => {
-  statsRow.innerHTML += `<div class="stat-card">
-    <div class="stat-label">${s.label}</div>
-    <div class="stat-value" style="color:${s.color}">${s.value}</div>
-  </div>`;
+ 
+const AVG_CT = 23.80;
+const AVG_MR = 18.00;
+const UNPL   = 71.68;
+const LNPL   = 0;          // clamped to 0 (raw = -24.08)
+const URL_MR = 3.267 * AVG_MR;  // 58.81
+const LRL_MR = 0;
+ 
+// ── SIGNAL ZONES ─────────────────────────────────────────────
+// For X chart: zones measured from AVG toward limits
+// 1/3 zone: AVG + 1/3*(UNPL-AVG)  = AVG + zone1 above
+// 2/3 zone: AVG + 2/3*(UNPL-AVG)  = AVG + zone2 above
+ 
+function getSignalX(ct) {
+  const rangeUp   = UNPL   - AVG_CT;  // 47.88
+  const rangeDn   = AVG_CT - LNPL;    // 23.80 (to 0)
+  const z1up = AVG_CT + (1/3) * rangeUp;   // 1/3 above
+  const z2up = AVG_CT + (2/3) * rangeUp;   // 2/3 above
+  const z1dn = AVG_CT - (1/3) * rangeDn;   // 1/3 below
+  const z2dn = AVG_CT - (2/3) * rangeDn;   // 2/3 below
+ 
+  if (ct > UNPL)             return 'STRONG';
+  if (ct > z2up)             return 'MODERATE';
+  if (ct > z1up)             return 'WEAK';
+  if (LNPL > 0 && ct < LNPL) return 'STRONG';
+  if (ct < z2dn && LNPL===0) return 'MODERATE_LOW';
+  if (ct < z1dn && LNPL===0) return 'WEAK_LOW';
+  return 'OK';
+}
+ 
+function getSignalMR(mr) {
+  const range    = URL_MR;
+  const z1 = (1/3) * range;
+  const z2 = (2/3) * range;
+ 
+  if (mr > URL_MR) return 'STRONG';
+  if (mr > z2)     return 'MODERATE';
+  if (mr > z1)     return 'WEAK';
+  return 'OK';
+}
+ 
+// ── TREND DETECTION (8 consecutive same side of mean) ─────────
+function detectTrends(pts, field, avg) {
+  const trends = new Set();
+  let runStart = 0, runDir = null, runLen = 0;
+  pts.forEach((d, i) => {
+    const v = d[field];
+    if (v == null) { runLen=0; runDir=null; return; }
+    const dir = v > avg ? 1 : v < avg ? -1 : 0;
+    if (dir === 0) { runLen=0; runDir=null; return; }
+    if (dir === runDir) {
+      runLen++;
+    } else {
+      runStart = i; runLen = 1; runDir = dir;
+    }
+    if (runLen >= 8) {
+      for (let j = runStart; j <= i; j++) trends.add(pts[j].id);
+    }
+  });
+  return trends;
+}
+ 
+const trendSetX  = detectTrends(data, 'ct', AVG_CT);
+const mrData     = data.filter(d => d.mr !== null);
+const trendSetMR = detectTrends(mrData, 'mr', AVG_MR);
+ 
+// ── SIGNAL COLORS / ICONS ─────────────────────────────────────
+const SIG = {
+  STRONG:       { col:'#dc2626', icon:'strong',   label:'Silny sygnał'       },
+  MODERATE:     { col:'#f59e0b', icon:'moderate', label:'Umiarkowany sygnał' },
+  MODERATE_LOW: { col:'#f59e0b', icon:'moderate', label:'Umiarkowany sygnał' },
+  WEAK:         { col:'#fb923c', icon:'weak',     label:'Słaby sygnał'       },
+  WEAK_LOW:     { col:'#fb923c', icon:'weak',     label:'Słaby sygnał'       },
+  TREND:        { col:'#16a34a', icon:'trend',    label:'Słaby trend (8+)'   },
+  OK:           { col:'#2563eb', icon:'ok',       label:'W kontroli'         },
+};
+ 
+function drawIcon(g, type, cx, cy) {
+  const s = SIG[type];
+  if (!s) return;
+  const c = s.col;
+  const G = g.append('g').attr('transform', `translate(${cx},${cy})`).style('pointer-events','none');
+ 
+  if (type === 'STRONG') {
+    G.append('circle').attr('r',9).attr('fill',c);
+    G.append('text').attr('y',5).attr('text-anchor','middle').attr('font-size','13px').attr('font-weight','900').attr('fill','white').text('!');
+  } else if (type === 'MODERATE' || type === 'MODERATE_LOW') {
+    G.append('circle').attr('r',9).attr('fill',c);
+    // gear icon approximation
+    G.append('circle').attr('r',4).attr('fill','none').attr('stroke','white').attr('stroke-width',1.5);
+    G.append('circle').attr('r',2).attr('fill','white');
+    [0,60,120,180,240,300].forEach(a => {
+      const rad = a*Math.PI/180;
+      G.append('rect').attr('x',-1).attr('y',-8).attr('width',2).attr('height',3)
+        .attr('fill','white').attr('transform',`rotate(${a})`);
+    });
+  } else if (type === 'WEAK' || type === 'WEAK_LOW') {
+    G.append('polygon').attr('points','0,-9 8,7 -8,7').attr('fill',c);
+    G.append('text').attr('y',6).attr('text-anchor','middle').attr('font-size','10px').attr('font-weight','900').attr('fill','white').text('!');
+  } else if (type === 'TREND') {
+    G.append('rect').attr('x',-8).attr('y',-8).attr('width',16).attr('height',16).attr('rx',3).attr('fill',c);
+    G.append('line').attr('x1',-4).attr('y1',2).attr('x2',0).attr('y2',5).attr('stroke','white').attr('stroke-width',2).attr('stroke-linecap','round');
+    G.append('line').attr('x1',0).attr('y1',5).attr('x2',5).attr('y2',-3).attr('stroke','white').attr('stroke-width',2).attr('stroke-linecap','round');
+  } else {
+    G.append('circle').attr('r',7).attr('fill',c).attr('fill-opacity',0.88).attr('stroke','#fff').attr('stroke-width',1.5);
+  }
+}
+ 
+// ── STATS ─────────────────────────────────────────────────────
+const statsRow = document.getElementById('statsRow');
+[
+  { label:'Zadania (n)',  value: data.length,           color:'#111827' },
+  { label:'Średni CT',   value: AVG_CT.toFixed(1)+' d', color:'#2563eb' },
+  { label:'UNPL',        value: UNPL.toFixed(1)+' d',  color:'#dc2626' },
+  { label:'LNPL',        value: '0.0 d (ujemne)',       color:'#16a34a' },
+  { label:'Śr. MR',      value: AVG_MR.toFixed(1)+' d', color:'#7c3aed' },
+  { label:'URL(MR)',      value: URL_MR.toFixed(1)+' d', color:'#ea580c' },
+].forEach(s => {
+  statsRow.innerHTML += `<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value" style="color:${s.color}">${s.value}</div></div>`;
 });
  
 // ── TOOLTIP ───────────────────────────────────────────────────
 const tooltip = document.getElementById('tooltip');
-function showTip(ev, html) {
-  tooltip.innerHTML = html;
-  tooltip.style.opacity = '1';
-  moveTip(ev);
-}
+function showTip(ev, html) { tooltip.innerHTML=html; tooltip.style.opacity='1'; moveTip(ev); }
 function moveTip(ev) {
-  let x = ev.clientX + 14, y = ev.clientY - 10;
-  if (x + 200 > window.innerWidth) x = ev.clientX - 210;
-  tooltip.style.left = x + 'px';
-  tooltip.style.top  = y + 'px';
+  let x=ev.clientX+16, y=ev.clientY-14;
+  if (x+230 > window.innerWidth) x=ev.clientX-240;
+  tooltip.style.left=x+'px'; tooltip.style.top=y+'px';
 }
-function hideTip() { tooltip.style.opacity = '0'; }
+function hideTip() { tooltip.style.opacity='0'; }
  
 // ── CHART BUILDER ─────────────────────────────────────────────
-function buildChart({
-  svgId, legendId, points, yField,
-  avgVal, avgLabel, avgColor,
-  unpl, unplLabel, unplColor,
-  lnpl, lnplLabel, lnplColor,
-  signalFn, tipFn, yLabel
-}) {
+function buildXMRChart({ svgId, legendId, pts, field, avg, avgLabel, avgColor,
+  upperLimit, upperLabel, upperColor, lowerLimit, lowerLabel, lowerColor,
+  getSignal, trendSet, extraLines }) {
+ 
   const W = Math.min(960, window.innerWidth - 96);
-  const H = 280;
-  const m = { top:14, right:100, bottom:44, left:56 };
+  const H = 320;
+  const m = { top:20, right:110, bottom:48, left:58 };
   const iW = W - m.left - m.right;
   const iH = H - m.top - m.bottom;
  
-  const svg = d3.select('#'+svgId).attr('width', W).attr('height', H);
-  const g   = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+  const svg = d3.select('#'+svgId).attr('width',W).attr('height',H);
+  const g   = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
  
-  const vals   = points.map(d => d[yField]).filter(v => v != null);
-  const yMax   = Math.max(...vals, unpl) * 1.12;
-  const yMin   = 0;
+  const vals = pts.map(d=>d[field]).filter(v=>v!=null);
+  const yMax = Math.max(...vals, upperLimit) * 1.15;
  
-  const xScale = d3.scaleLinear().domain([1, points.length]).range([0, iW]);
-  const yScale = d3.scaleLinear().domain([yMin, yMax]).range([iH, 0]).nice();
+  const xScale = d3.scaleLinear().domain([1, data.length]).range([0, iW]);
+  const yScale = d3.scaleLinear().domain([0, yMax]).range([iH, 0]).nice();
  
-  // Grid lines
-  g.selectAll('.grid').data(yScale.ticks(6)).enter().append('line')
-    .attr('x1',0).attr('x2',iW)
-    .attr('y1', d=>yScale(d)).attr('y2', d=>yScale(d))
+  // ── ZONE SHADING ─────────────────────────────────────────────
+  const rangeUp = upperLimit - avg;
+  const rangeDn = avg - lowerLimit;
+  const z1u = avg + (1/3)*rangeUp, z2u = avg + (2/3)*rangeUp;
+  const z1d = avg - (1/3)*rangeDn, z2d = avg - (2/3)*rangeDn;
+ 
+  // Weak zone (1/3–2/3): orange tint
+  g.append('rect').attr('x',0).attr('y',yScale(z2u)).attr('width',iW).attr('height',yScale(z1u)-yScale(z2u)).attr('fill','#fb923c').attr('fill-opacity',0.07);
+  // Moderate zone (2/3–limit): red tint
+  g.append('rect').attr('x',0).attr('y',yScale(upperLimit)).attr('width',iW).attr('height',yScale(z2u)-yScale(upperLimit)).attr('fill','#dc2626').attr('fill-opacity',0.06);
+  // Weak zone below
+  if (z1d > 0) {
+    g.append('rect').attr('x',0).attr('y',yScale(z1d)).attr('width',iW).attr('height',yScale(z2d)-yScale(z1d)).attr('fill','#fb923c').attr('fill-opacity',0.07);
+    g.append('rect').attr('x',0).attr('y',yScale(lowerLimit>0?lowerLimit:0)).attr('width',iW).attr('height',yScale(z2d)-yScale(lowerLimit>0?lowerLimit:0)).attr('fill','#dc2626').attr('fill-opacity',0.06);
+  }
+ 
+  // ── GRID ──────────────────────────────────────────────────────
+  g.selectAll('.gl').data(yScale.ticks(6)).enter().append('line')
+    .attr('x1',0).attr('x2',iW).attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
     .attr('stroke','#f0f0f0').attr('stroke-width',1);
  
-  // Reference lines (LNPL, UNPL, AVG)
-  const refLines = [
-    { val:unpl, col:unplColor, label:unplLabel, dash:'6 3' },
-    { val:avgVal, col:avgColor, label:avgLabel, dash:null },
-  ];
-  if (lnpl > 0) refLines.push({ val:lnpl, col:lnplColor, label:lnplLabel, dash:'6 3' });
- 
-  refLines.forEach(({ val, col, label, dash }) => {
-    const y = yScale(val);
-    g.append('line')
-      .attr('x1',0).attr('x2',iW)
-      .attr('y1',y).attr('y2',y)
-      .attr('stroke',col).attr('stroke-width',dash?1.8:2.2)
-      .attr('stroke-dasharray',dash||'none')
-      .attr('opacity',0.9);
-    g.append('text')
-      .attr('x',iW+6).attr('y',y+4)
-      .attr('fill',col).attr('font-size','11px').attr('font-weight','700')
-      .text(`${label}=${val.toFixed(1)}`);
-  });
- 
-  // Connecting line
-  const visPoints = points.filter(d => d[yField] != null);
-  g.append('path')
-    .datum(visPoints)
-    .attr('fill','none')
-    .attr('stroke','#94a3b8')
-    .attr('stroke-width',1.5)
-    .attr('d', d3.line()
-      .x(d => xScale(d.id))
-      .y(d => yScale(d[yField]))
-    );
- 
-  // Dots
-  visPoints.forEach(d => {
-    const cx   = xScale(d.id);
-    const cy   = yScale(d[yField]);
-    const sig  = signalFn(d);
-    const col  = sig ? '#dc2626' : '#2563eb';
-    const r    = sig ? 7 : 5.5;
- 
-    // Signal: outer ring
-    if (sig) {
-      g.append('circle')
-        .attr('cx',cx).attr('cy',cy).attr('r',r+4)
-        .attr('fill','none').attr('stroke','#dc2626')
-        .attr('stroke-width',1.5).attr('opacity',0.35);
+  // ── TREND HIGHLIGHT ───────────────────────────────────────────
+  // Highlight consecutive trend points as green band
+  let trendRuns = [], inRun = false, runStart = null;
+  pts.forEach((d,i) => {
+    if (trendSet.has(d.id)) {
+      if (!inRun) { inRun=true; runStart=d.id; }
+    } else {
+      if (inRun) { trendRuns.push({start:runStart, end:pts[i-1].id}); inRun=false; }
     }
+  });
+  if (inRun) trendRuns.push({start:runStart, end:pts[pts.length-1].id});
  
-    g.append('circle')
-      .attr('cx',cx).attr('cy',cy).attr('r',r)
-      .attr('fill',col).attr('fill-opacity',sig?1:0.88)
-      .attr('stroke','#fff').attr('stroke-width',1.5)
-      .style('cursor','pointer')
-      .on('mousemove', ev => showTip(ev, tipFn(d)))
-      .on('mouseover', function() { d3.select(this).attr('r', r+2); })
-      .on('mouseout',  function() { d3.select(this).attr('r', r); hideTip(); });
+  trendRuns.forEach(run => {
+    const x1 = xScale(run.start)-6, x2 = xScale(run.end)+6;
+    g.append('rect').attr('x',x1).attr('y',0).attr('width',x2-x1).attr('height',iH)
+      .attr('fill','#16a34a').attr('fill-opacity',0.08).attr('rx',4);
   });
  
-  // X axis — show every 5 ticks
-  g.append('g')
-    .attr('transform',`translate(0,${iH})`)
-    .call(d3.axisBottom(xScale)
-      .tickValues(points.map(d=>d.id).filter(id=>id===1||id%5===0||id===points.length))
-      .tickFormat(id => {
-        const d = points.find(p=>p.id===id);
-        return d ? `#${id}\n${d.closed.slice(5)}` : id;
-      })
-    )
+  // ── REFERENCE LINES ───────────────────────────────────────────
+  const refLines = [
+    { val:upperLimit, col:upperColor, lbl:upperLabel, dash:'7 4', w:2 },
+    { val:avg,        col:avgColor,   lbl:avgLabel,   dash:null,  w:2.2 },
+    { val:z2u,        col:'#f59e0b',  lbl:'2/3',      dash:'4 4', w:1 },
+    { val:z1u,        col:'#fb923c',  lbl:'1/3',      dash:'3 4', w:1 },
+  ];
+  if (lowerLimit > 0) {
+    refLines.push({ val:lowerLimit, col:lowerColor, lbl:lowerLabel, dash:'7 4', w:2 });
+    refLines.push({ val:z2d, col:'#f59e0b', lbl:'2/3↓', dash:'4 4', w:1 });
+    refLines.push({ val:z1d, col:'#fb923c', lbl:'1/3↓', dash:'3 4', w:1 });
+  }
+  if (extraLines) extraLines.forEach(l => refLines.push(l));
+ 
+  refLines.forEach(({ val, col, lbl, dash, w }) => {
+    if (val < 0) return;
+    const y = yScale(val);
+    g.append('line').attr('x1',0).attr('x2',iW).attr('y1',y).attr('y2',y)
+      .attr('stroke',col).attr('stroke-width',w||1.5)
+      .attr('stroke-dasharray',dash||'none').attr('opacity',0.85);
+    g.append('text').attr('x',iW+5).attr('y',y+4).attr('fill',col)
+      .attr('font-size','10px').attr('font-weight','700').text(`${lbl}=${val.toFixed(1)}`);
+  });
+ 
+  // ── CONNECTING LINE ────────────────────────────────────────────
+  const visPts = pts.filter(d=>d[field]!=null);
+  g.append('path').datum(visPts)
+    .attr('fill','none').attr('stroke','#cbd5e1').attr('stroke-width',1.5)
+    .attr('d', d3.line().x(d=>xScale(d.id)).y(d=>yScale(d[field])));
+ 
+  // ── DOTS + ICONS ──────────────────────────────────────────────
+  visPts.forEach(d => {
+    const cx  = xScale(d.id);
+    const cy  = yScale(d[field]);
+    const sig = trendSet.has(d.id) ? 'TREND' : getSignal(d[field]);
+    const s   = SIG[sig];
+ 
+    // Tooltip content
+    const sigBox = sig !== 'OK'
+      ? `<div class="signal-box" style="background:${s.col}22;color:${s.col};border:1px solid ${s.col}44">${s.label}</div>`
+      : '';
+ 
+    const tipHtml = `<strong>#${d.id} · ${d.closed}</strong>
+      <div class="tt-row"><span>${field === 'ct' ? 'Cycle Time' : 'Moving Range'}:</span><span style="color:#93c5fd">${d[field]} dni</span></div>
+      <div class="tt-row"><span>Średnia:</span><span>${avg.toFixed(1)} dni</span></div>
+      <div class="tt-row"><span>${upperLabel}:</span><span style="color:#fca5a5">${upperLimit.toFixed(1)} dni</span></div>
+      ${sigBox}`;
+ 
+    // Hover zone (invisible larger circle for easy hover)
+    g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',14)
+      .attr('fill','transparent').style('cursor','pointer')
+      .on('mousemove', ev => showTip(ev, tipHtml))
+      .on('mouseover', function() { d3.select(this.nextSibling).attr('opacity',1); })
+      .on('mouseout',  function() { hideTip(); });
+ 
+    drawIcon(g, sig, cx, cy);
+  });
+ 
+  // ── AXES ──────────────────────────────────────────────────────
+  const tickIds = pts.map(d=>d.id).filter(id => id===1||id%5===0||id===pts[pts.length-1].id);
+  g.append('g').attr('transform',`translate(0,${iH})`)
+    .call(d3.axisBottom(xScale).tickValues(tickIds).tickFormat(id => {
+      const d = pts.find(p=>p.id===id);
+      return d ? `#${id}` : id;
+    }))
     .call(ax => {
       ax.select('.domain').attr('stroke','#d1d5db');
       ax.selectAll('line').attr('stroke','#d1d5db');
-      ax.selectAll('text').attr('fill','#6b7280').attr('font-size','10px').attr('text-anchor','middle').attr('dy','1.3em');
+      ax.selectAll('text').attr('fill','#6b7280').attr('font-size','10px');
     });
  
-  // X axis secondary labels (date)
-  g.selectAll('.x-date').data(points.filter(d=>d.id===1||d.id%5===0||d.id===points.length)).enter()
-    .append('text')
-    .attr('class','x-date')
-    .attr('x', d=>xScale(d.id))
-    .attr('y', iH+28)
-    .attr('text-anchor','middle')
-    .attr('fill','#9ca3af')
-    .attr('font-size','9px')
+  // Date labels below
+  g.selectAll('.xdt').data(pts.filter(d=>d.id===1||d.id%5===0||d.id===pts[pts.length-1].id)).enter()
+    .append('text').attr('class','xdt')
+    .attr('x', d=>xScale(d.id)).attr('y', iH+30)
+    .attr('text-anchor','middle').attr('fill','#9ca3af').attr('font-size','9px')
     .text(d=>d.closed.slice(5));
  
-  // Y axis
   g.append('g')
     .call(d3.axisLeft(yScale).ticks(6).tickFormat(d=>d+' d'))
     .call(ax => {
@@ -247,67 +404,54 @@ function buildChart({
     });
  
   // Y label
-  g.append('text')
-    .attr('transform','rotate(-90)')
-    .attr('x',-iH/2).attr('y',-42)
+  g.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-44)
     .attr('text-anchor','middle').attr('fill','#9ca3af').attr('font-size','10px')
-    .text(yLabel);
+    .text(field==='ct'?'Cycle Time (dni)':'Moving Range (dni)');
  
-  // Legend
+  // ── LEGEND ────────────────────────────────────────────────────
   const legEl = document.getElementById(legendId);
   legEl.innerHTML = '';
-  [
-    { label:`Średnia (${avgLabel}) = ${avgVal.toFixed(1)} dni`, color:avgColor, dash:false },
-    { label:`UNPL (${unplLabel}) = ${unpl.toFixed(1)} dni`, color:unplColor, dash:true },
-    ...(lnpl>0?[{ label:`LNPL (${lnplLabel}) = ${lnpl.toFixed(1)} dni`, color:lnplColor, dash:true }]:[]),
-    { label:'Sygnał (poza limitami)', color:'#dc2626', dot:true },
-    { label:'W kontroli', color:'#2563eb', dot:true },
-  ].forEach(l => {
+  const legItems = [
+    { label:`Średnia (${avgLabel}) = ${avg.toFixed(1)} d`, col:avgColor, dash:false, w:2.2 },
+    { label:`${upperLabel} = ${upperLimit.toFixed(1)} d`, col:upperColor, dash:true },
+    ...(lowerLimit>0 ? [{ label:`${lowerLabel} = ${lowerLimit.toFixed(1)} d`, col:lowerColor, dash:true }] : []),
+    { label:`Strefa 2/3 (umiarkowana)`, col:'#f59e0b', dash:true },
+    { label:`Strefa 1/3 (słaba)`, col:'#fb923c', dash:true },
+    { label:`Trend (8+ po jednej stronie)`, col:'#16a34a', trend:true },
+  ];
+  legItems.forEach(l => {
     const item = document.createElement('div'); item.className='leg-item';
-    if (l.dot) {
-      item.innerHTML=`<svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="${l.color}"/></svg><span>${l.label}</span>`;
+    if (l.trend) {
+      item.innerHTML=`<div style="width:22px;height:10px;background:#16a34a;opacity:0.18;border:1px solid #16a34a;border-radius:2px"></div><span>${l.label}</span>`;
+    } else if (l.dash) {
+      item.innerHTML=`<div class="leg-line" style="height:0;border-top:2px dashed ${l.col}"></div><span>${l.label}</span>`;
     } else {
-      const style = l.dash ? `border-top:2px dashed ${l.color}` : `background:${l.color}`;
-      item.innerHTML=`<div class="leg-line" style="${style};height:${l.dash?'0':'3px'}"></div><span>${l.label}</span>`;
+      item.innerHTML=`<div class="leg-line" style="background:${l.col};height:${l.w||2}px"></div><span>${l.label}</span>`;
     }
     legEl.appendChild(item);
   });
 }
  
-// ── X CHART ───────────────────────────────────────────────────
-buildChart({
+// ── BUILD X CHART ─────────────────────────────────────────────
+buildXMRChart({
   svgId:'xChart', legendId:'xLegend',
-  points: data,
-  yField:'ct',
-  avgVal:  AVG_CT,  avgLabel:'CT̄',  avgColor:'#2563eb',
-  unpl:    UNPL,    unplLabel:'UNPL', unplColor:'#dc2626',
-  lnpl:    LNPL,    lnplLabel:'LNPL', lnplColor:'#16a34a',
-  signalFn: d => d.ct > UNPL || (LNPL > 0 && d.ct < LNPL),
-  tipFn: d => `<strong>#${d.id} · ${d.closed}</strong>
-    <div class="tt-row"><span>Cycle Time:</span><span style="color:#93c5fd">${d.ct} dni</span></div>
-    <div class="tt-row"><span>Śr. CT:</span><span>${AVG_CT.toFixed(1)} dni</span></div>
-    <div class="tt-row"><span>UNPL:</span><span style="color:#fca5a5">${UNPL.toFixed(1)} dni</span></div>
-    ${d.ct > UNPL ? '<div style="color:#f87171;margin-top:4px;font-weight:700">⚠ Sygnał — powyżej UNPL</div>' : ''}`,
-  yLabel: 'Cycle Time (dni)'
+  pts: data, field:'ct',
+  avg: AVG_CT, avgLabel:'CT̄', avgColor:'#2563eb',
+  upperLimit: UNPL, upperLabel:'UNPL', upperColor:'#dc2626',
+  lowerLimit: LNPL, lowerLabel:'LNPL', lowerColor:'#16a34a',
+  getSignal: v => getSignalX(v),
+  trendSet: trendSetX,
 });
  
-// ── MR CHART ──────────────────────────────────────────────────
-const mrData = data.filter(d => d.mr !== null);
- 
-buildChart({
+// ── BUILD MR CHART ────────────────────────────────────────────
+buildXMRChart({
   svgId:'mrChart', legendId:'mrLegend',
-  points: mrData,
-  yField:'mr',
-  avgVal:  AVG_MR,   avgLabel:'MR̄',   avgColor:'#7c3aed',
-  unpl:    URL_MR,   unplLabel:'URL', unplColor:'#ea580c',
-  lnpl:    0,        lnplLabel:'',    lnplColor:'transparent',
-  signalFn: d => d.mr > URL_MR,
-  tipFn: d => `<strong>#${d.id} · ${d.closed}</strong>
-    <div class="tt-row"><span>Moving Range:</span><span style="color:#c4b5fd">${d.mr} dni</span></div>
-    <div class="tt-row"><span>Śr. MR:</span><span>${AVG_MR.toFixed(1)} dni</span></div>
-    <div class="tt-row"><span>URL(MR):</span><span style="color:#fdba74">${URL_MR.toFixed(1)} dni</span></div>
-    ${d.mr > URL_MR ? '<div style="color:#fb923c;margin-top:4px;font-weight:700">⚠ Sygnał — powyżej URL</div>' : ''}`,
-  yLabel: 'Moving Range (dni)'
+  pts: mrData, field:'mr',
+  avg: AVG_MR, avgLabel:'MR̄', avgColor:'#7c3aed',
+  upperLimit: URL_MR, upperLabel:'URL', upperColor:'#ea580c',
+  lowerLimit: 0, lowerLabel:'LRL', lowerColor:'transparent',
+  getSignal: v => getSignalMR(v),
+  trendSet: trendSetMR,
 });
 </script>
 </body>
