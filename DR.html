@@ -1,4 +1,4 @@
-Xmr throughput daily · HTML
+Xmr throughput weekly · HTML
 Copy
 
 <!DOCTYPE html>
@@ -6,52 +6,63 @@ Copy
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XMR Dashboard – Throughput Daily</title>
+<title>XMR Dashboard – Weekly Throughput</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:#f4f6f9; color:#1a1f2e; font-family:'Segoe UI',system-ui,sans-serif; padding:24px; min-width:600px; }
+body { background:#f4f6f9; color:#1a1f2e; font-family:'Segoe UI',system-ui,sans-serif; padding:24px; }
  
 h1 { font-size:1.25rem; font-weight:700; color:#111827; }
 .subtitle { font-size:0.8rem; color:#6b7280; margin-top:3px; }
 .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
  
 .stats-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
-.stat-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:11px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.05); min-width:110px; }
-.stat-label { font-size:0.68rem; color:#6b7280; text-transform:uppercase; letter-spacing:0.06em; }
-.stat-value { font-size:1.35rem; font-weight:700; margin-top:2px; }
+.stat-card {
+  background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+  padding:11px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.05); min-width:120px; flex:1;
+}
+.stat-label { font-size:0.67rem; color:#6b7280; text-transform:uppercase; letter-spacing:0.06em; }
+.stat-value { font-size:1.4rem; font-weight:700; margin-top:2px; }
+.stat-sub { font-size:0.68rem; color:#9ca3af; margin-top:1px; }
  
-.chart-wrap { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.05); margin-bottom:16px; }
+.chart-wrap {
+  background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+  padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.05); margin-bottom:16px;
+}
 .chart-title { font-size:0.88rem; font-weight:700; color:#111827; margin-bottom:2px; }
-.chart-desc { font-size:0.72rem; color:#9ca3af; margin-bottom:14px; }
+.chart-desc { font-size:0.71rem; color:#9ca3af; margin-bottom:16px; }
  
-.sig-panel { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:14px 18px; margin-bottom:18px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
-.sig-panel-title { font-size:0.68rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px; }
-.sig-grid { display:flex; gap:18px; flex-wrap:wrap; }
-.sig-item { display:flex; align-items:flex-start; gap:9px; min-width:170px; flex:1; }
+.sig-panel {
+  background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+  padding:14px 18px; margin-bottom:18px; box-shadow:0 1px 3px rgba(0,0,0,0.05);
+}
+.sig-panel-title { font-size:0.67rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px; }
+.sig-grid { display:flex; gap:20px; flex-wrap:wrap; }
+.sig-item { display:flex; align-items:flex-start; gap:9px; min-width:165px; flex:1; }
 .sig-text strong { font-size:0.78rem; display:block; margin-bottom:1px; }
 .sig-text span { font-size:0.69rem; color:#6b7280; line-height:1.4; }
  
-.legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px solid #f3f4f6; }
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px solid #f3f4f6; }
 .leg-item { display:flex; align-items:center; gap:6px; font-size:0.72rem; color:#4b5563; }
  
 .tooltip {
-  position:fixed; background:#1e2330; color:#e6edf3; border-radius:8px;
-  padding:10px 14px; font-size:0.74rem; pointer-events:none; opacity:0;
-  transition:opacity 0.1s; z-index:200; min-width:210px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.25);
+  position:fixed; background:#1e2330; color:#e6edf3; border-radius:9px;
+  padding:11px 15px; font-size:0.74rem; pointer-events:none; opacity:0;
+  transition:opacity 0.1s; z-index:200; min-width:230px;
+  box-shadow:0 6px 24px rgba(0,0,0,0.28);
 }
-.tooltip strong { color:#fff; display:block; margin-bottom:4px; font-size:0.8rem; }
-.tt-row { display:flex; justify-content:space-between; gap:18px; margin-bottom:2px; }
-.sig-badge { margin-top:6px; padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.71rem; display:inline-block; }
+.tooltip strong { color:#fff; display:block; margin-bottom:5px; font-size:0.82rem; }
+.tt-row { display:flex; justify-content:space-between; gap:20px; margin-bottom:3px; }
+.tt-div { border-top:1px solid #ffffff1a; margin:6px 0; }
+.sig-badge { margin-top:6px; padding:4px 9px; border-radius:5px; font-weight:700; font-size:0.72rem; display:inline-block; }
 </style>
 </head>
 <body>
  
 <div class="header">
   <div>
-    <h1>XMR Dashboard — Throughput Daily</h1>
-    <div class="subtitle">Dzienne tempo dostarczania · styczeń–kwiecień 2025 · n=103 dni</div>
+    <h1>XMR Dashboard — Weekly Throughput</h1>
+    <div class="subtitle">Tygodniowe tempo dostarczania (dni robocze) · styczeń–kwiecień 2025 · mediana jako punkt odniesienia</div>
   </div>
 </div>
  
@@ -76,14 +87,14 @@ h1 { font-size:1.25rem; font-weight:700; color:#111827; }
         <circle cx="14" cy="14" r="13" fill="#f59e0b"/>
         <circle cx="14" cy="14" r="5" fill="none" stroke="white" stroke-width="1.8"/>
         <circle cx="14" cy="14" r="2" fill="white"/>
-        <line x1="14" y1="5.5" x2="14" y2="8.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        <line x1="14" y1="19.5" x2="14" y2="22.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        <line x1="5.5" y1="14" x2="8.5" y2="14" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        <line x1="19.5" y1="14" x2="22.5" y2="14" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        <line x1="8.1" y1="8.1" x2="10.2" y2="10.2" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        <line x1="17.8" y1="17.8" x2="19.9" y2="19.9" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        <line x1="19.9" y1="8.1" x2="17.8" y2="10.2" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        <line x1="8.1" y1="19.9" x2="10.2" y2="17.8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="14" y1="5.5" x2="14" y2="8.5" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="14" y1="19.5" x2="14" y2="22.5" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="5.5" y1="14" x2="8.5" y2="14" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="19.5" y1="14" x2="22.5" y2="14" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="7.8" y1="7.8" x2="9.9" y2="9.9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="18.1" y1="18.1" x2="20.2" y2="20.2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="20.2" y1="7.8" x2="18.1" y2="9.9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="7.8" y1="20.2" x2="9.9" y2="18.1" stroke="white" stroke-width="2" stroke-linecap="round"/>
       </svg>
       <div class="sig-text">
         <strong style="color:#f59e0b">Umiarkowany sygnał</strong>
@@ -110,7 +121,7 @@ h1 { font-size:1.25rem; font-weight:700; color:#111827; }
       </svg>
       <div class="sig-text">
         <strong style="color:#16a34a">Słaby trend</strong>
-        <span>8+ kolejnych wartości po jednej stronie średniej</span>
+        <span>8+ kolejnych wartości po jednej stronie mediany</span>
       </div>
     </div>
  
@@ -132,8 +143,8 @@ h1 { font-size:1.25rem; font-weight:700; color:#111827; }
  
 <!-- X Chart -->
 <div class="chart-wrap">
-  <div class="chart-title">X Chart — Throughput dzienny (zadania / dzień)</div>
-  <div class="chart-desc">Każdy punkt = jeden dzień · strefy 1/3 i 2/3 limitów · zielone pasmo = słaby trend (8+ punktów po jednej stronie średniej)</div>
+  <div class="chart-title">X Chart — Tygodniowy Throughput (zadania / tydzień roboczy)</div>
+  <div class="chart-desc">Każdy punkt = jeden tydzień roboczy (pn–pt, bez weekendów) · linia środkowa = mediana · strefy 1/3 i 2/3 UNPL/LNPL</div>
   <svg id="xChart"></svg>
   <div class="legend" id="xLegend"></div>
 </div>
@@ -141,7 +152,7 @@ h1 { font-size:1.25rem; font-weight:700; color:#111827; }
 <!-- MR Chart -->
 <div class="chart-wrap">
   <div class="chart-title">MR Chart — Moving Range (ruchomy zakres zmienności)</div>
-  <div class="chart-desc">Bezwzględna różnica między kolejnymi dniami · URL = 3.267 × śr.MR · strefy sygnałów zaznaczone cieniowaniem</div>
+  <div class="chart-desc">Bezwzględna różnica między kolejnymi tygodniami · linia środkowa = mediana MR · URL = 3.267 × mediana MR</div>
   <svg id="mrChart"></svg>
   <div class="legend" id="mrLegend"></div>
 </div>
@@ -150,47 +161,74 @@ h1 { font-size:1.25rem; font-weight:700; color:#111827; }
  
 <script>
 // ── DATA ──────────────────────────────────────────────────────
-const DATA = [{"id":1,"date":"2025-01-07","tp":0,"mr":null},{"id":2,"date":"2025-01-08","tp":2,"mr":2},{"id":3,"date":"2025-01-09","tp":10,"mr":8},{"id":4,"date":"2025-01-10","tp":3,"mr":7},{"id":5,"date":"2025-01-11","tp":0,"mr":3},{"id":6,"date":"2025-01-12","tp":0,"mr":0},{"id":7,"date":"2025-01-13","tp":2,"mr":2},{"id":8,"date":"2025-01-14","tp":3,"mr":1},{"id":9,"date":"2025-01-15","tp":7,"mr":4},{"id":10,"date":"2025-01-16","tp":0,"mr":7},{"id":11,"date":"2025-01-17","tp":0,"mr":0},{"id":12,"date":"2025-01-18","tp":0,"mr":0},{"id":13,"date":"2025-01-19","tp":0,"mr":0},{"id":14,"date":"2025-01-20","tp":5,"mr":5},{"id":15,"date":"2025-01-21","tp":2,"mr":3},{"id":16,"date":"2025-01-22","tp":0,"mr":2},{"id":17,"date":"2025-01-23","tp":0,"mr":0},{"id":18,"date":"2025-01-24","tp":0,"mr":0},{"id":19,"date":"2025-01-25","tp":0,"mr":0},{"id":20,"date":"2025-01-26","tp":0,"mr":0},{"id":21,"date":"2025-01-27","tp":1,"mr":1},{"id":22,"date":"2025-01-28","tp":1,"mr":0},{"id":23,"date":"2025-01-29","tp":0,"mr":1},{"id":24,"date":"2025-01-30","tp":5,"mr":5},{"id":25,"date":"2025-01-31","tp":4,"mr":1},{"id":26,"date":"2025-02-01","tp":0,"mr":4},{"id":27,"date":"2025-02-02","tp":0,"mr":0},{"id":28,"date":"2025-02-03","tp":7,"mr":7},{"id":29,"date":"2025-02-04","tp":0,"mr":7},{"id":30,"date":"2025-02-05","tp":2,"mr":2},{"id":31,"date":"2025-02-06","tp":2,"mr":0},{"id":32,"date":"2025-02-07","tp":12,"mr":10},{"id":33,"date":"2025-02-08","tp":0,"mr":12},{"id":34,"date":"2025-02-09","tp":0,"mr":0},{"id":35,"date":"2025-02-10","tp":1,"mr":1},{"id":36,"date":"2025-02-11","tp":0,"mr":1},{"id":37,"date":"2025-02-12","tp":0,"mr":0},{"id":38,"date":"2025-02-13","tp":2,"mr":2},{"id":39,"date":"2025-02-14","tp":12,"mr":10},{"id":40,"date":"2025-02-15","tp":0,"mr":12},{"id":41,"date":"2025-02-16","tp":0,"mr":0},{"id":42,"date":"2025-02-17","tp":1,"mr":1},{"id":43,"date":"2025-02-18","tp":0,"mr":1},{"id":44,"date":"2025-02-19","tp":0,"mr":0},{"id":45,"date":"2025-02-20","tp":3,"mr":3},{"id":46,"date":"2025-02-21","tp":11,"mr":8},{"id":47,"date":"2025-02-22","tp":0,"mr":11},{"id":48,"date":"2025-02-23","tp":0,"mr":0},{"id":49,"date":"2025-02-24","tp":6,"mr":6},{"id":50,"date":"2025-02-25","tp":0,"mr":6},{"id":51,"date":"2025-02-26","tp":0,"mr":0},{"id":52,"date":"2025-02-27","tp":6,"mr":6},{"id":53,"date":"2025-02-28","tp":7,"mr":1},{"id":54,"date":"2025-03-01","tp":0,"mr":7},{"id":55,"date":"2025-03-02","tp":0,"mr":0},{"id":56,"date":"2025-03-03","tp":2,"mr":2},{"id":57,"date":"2025-03-04","tp":0,"mr":2},{"id":58,"date":"2025-03-05","tp":0,"mr":0},{"id":59,"date":"2025-03-06","tp":3,"mr":3},{"id":60,"date":"2025-03-07","tp":5,"mr":2},{"id":61,"date":"2025-03-08","tp":0,"mr":5},{"id":62,"date":"2025-03-09","tp":0,"mr":0},{"id":63,"date":"2025-03-10","tp":1,"mr":1},{"id":64,"date":"2025-03-11","tp":0,"mr":1},{"id":65,"date":"2025-03-12","tp":0,"mr":0},{"id":66,"date":"2025-03-13","tp":9,"mr":9},{"id":67,"date":"2025-03-14","tp":7,"mr":2},{"id":68,"date":"2025-03-15","tp":0,"mr":7},{"id":69,"date":"2025-03-16","tp":0,"mr":0},{"id":70,"date":"2025-03-17","tp":3,"mr":3},{"id":71,"date":"2025-03-18","tp":0,"mr":3},{"id":72,"date":"2025-03-19","tp":0,"mr":0},{"id":73,"date":"2025-03-20","tp":4,"mr":4},{"id":74,"date":"2025-03-21","tp":10,"mr":6},{"id":75,"date":"2025-03-22","tp":0,"mr":10},{"id":76,"date":"2025-03-23","tp":0,"mr":0},{"id":77,"date":"2025-03-24","tp":1,"mr":1},{"id":78,"date":"2025-03-25","tp":0,"mr":1},{"id":79,"date":"2025-03-26","tp":0,"mr":0},{"id":80,"date":"2025-03-27","tp":5,"mr":5},{"id":81,"date":"2025-03-28","tp":1,"mr":4},{"id":82,"date":"2025-03-29","tp":0,"mr":1},{"id":83,"date":"2025-03-30","tp":0,"mr":0},{"id":84,"date":"2025-03-31","tp":2,"mr":2},{"id":85,"date":"2025-04-01","tp":0,"mr":2},{"id":86,"date":"2025-04-02","tp":0,"mr":0},{"id":87,"date":"2025-04-03","tp":2,"mr":2},{"id":88,"date":"2025-04-04","tp":11,"mr":9},{"id":89,"date":"2025-04-05","tp":0,"mr":11},{"id":90,"date":"2025-04-06","tp":0,"mr":0},{"id":91,"date":"2025-04-07","tp":1,"mr":1},{"id":92,"date":"2025-04-08","tp":0,"mr":1},{"id":93,"date":"2025-04-09","tp":0,"mr":0},{"id":94,"date":"2025-04-10","tp":5,"mr":5},{"id":95,"date":"2025-04-11","tp":2,"mr":3},{"id":96,"date":"2025-04-12","tp":0,"mr":2},{"id":97,"date":"2025-04-13","tp":0,"mr":0},{"id":98,"date":"2025-04-14","tp":1,"mr":1},{"id":99,"date":"2025-04-15","tp":0,"mr":1},{"id":100,"date":"2025-04-16","tp":0,"mr":0},{"id":101,"date":"2025-04-17","tp":4,"mr":4},{"id":102,"date":"2025-04-18","tp":7,"mr":3},{"id":103,"date":"2025-04-19","tp":0,"mr":7}];
+const DATA = [
+  {id:1,  week:"2025-01-06", label:"07.01 – 10.01", tp:15, days:4, mr:null},
+  {id:2,  week:"2025-01-13", label:"13.01 – 17.01", tp:12, days:5, mr:3},
+  {id:3,  week:"2025-01-20", label:"20.01 – 24.01", tp:7,  days:5, mr:5},
+  {id:4,  week:"2025-01-27", label:"27.01 – 31.01", tp:11, days:5, mr:4},
+  {id:5,  week:"2025-02-03", label:"03.02 – 07.02", tp:23, days:5, mr:12},
+  {id:6,  week:"2025-02-10", label:"10.02 – 14.02", tp:15, days:5, mr:8},
+  {id:7,  week:"2025-02-17", label:"17.02 – 21.02", tp:15, days:5, mr:0},
+  {id:8,  week:"2025-02-24", label:"24.02 – 28.02", tp:19, days:5, mr:4},
+  {id:9,  week:"2025-03-03", label:"03.03 – 07.03", tp:10, days:5, mr:9},
+  {id:10, week:"2025-03-10", label:"10.03 – 14.03", tp:17, days:5, mr:7},
+  {id:11, week:"2025-03-17", label:"17.03 – 21.03", tp:17, days:5, mr:0},
+  {id:12, week:"2025-03-24", label:"24.03 – 28.03", tp:7,  days:5, mr:10},
+  {id:13, week:"2025-03-31", label:"31.03 – 04.04", tp:15, days:5, mr:8},
+  {id:14, week:"2025-04-07", label:"07.04 – 11.04", tp:8,  days:5, mr:7},
+  {id:15, week:"2025-04-14", label:"14.04 – 18.04", tp:12, days:5, mr:4},
+];
  
-const AVG_DR = 1.9709;
-const AVG_MR = 2.902;
-const UNPL   = 9.6901;
-const LNPL   = 0;          // raw -5.7483 → floored at 0
-const URL_MR = 9.4807;
-const LRL_MR = 0;
+const MEDIAN_DR = 15.0;
+const MEDIAN_MR = 6.0;
+const UNPL      = 30.96;
+const LNPL      = 0;        // raw -0.96 → floored at 0
+const URL_MR    = 19.602;
+const LRL_MR    = 0;
  
 const mrData = DATA.filter(d => d.mr !== null);
  
-// ── SIGNAL CLASSIFICATION ────────────────────────────────────
-function zones(avg, upper, lower) {
-  const ru = upper - avg, rd = avg - lower;
-  return { z1u: avg+(1/3)*ru, z2u: avg+(2/3)*ru,
-           z1d: avg-(1/3)*rd, z2d: avg-(2/3)*rd };
-}
+// ── SIGNAL ZONES ──────────────────────────────────────────────
+function classifyX(v) {
+  const ru = UNPL - MEDIAN_DR;
+  const rd = MEDIAN_DR - LNPL;   // LNPL=0, so rd=15
+  const z1u = MEDIAN_DR + (1/3)*ru;
+  const z2u = MEDIAN_DR + (2/3)*ru;
+  const z1d = MEDIAN_DR - (1/3)*rd;
+  const z2d = MEDIAN_DR - (2/3)*rd;
  
-function classifyTP(v) {
-  const z = zones(AVG_DR, UNPL, LNPL);
-  if (v >= UNPL)  return 'STRONG';
-  if (v >= z.z2u) return 'MODERATE';
-  if (v >= z.z1u) return 'WEAK';
+  if (v >= UNPL || v <= LNPL && LNPL > 0) return 'STRONG';
+  if (v >= z2u) return 'MODERATE';
+  if (v >= z1u) return 'WEAK';
+  // Below median
+  if (v <= z2d) return 'MODERATE_LOW';
+  if (v <= z1d) return 'WEAK_LOW';
   return 'OK';
 }
  
 function classifyMR(v) {
-  const z1 = (1/3)*URL_MR, z2 = (2/3)*URL_MR;
+  const z1 = (1/3) * URL_MR;
+  const z2 = (2/3) * URL_MR;
   if (v >= URL_MR) return 'STRONG';
   if (v >= z2)     return 'MODERATE';
   if (v >= z1)     return 'WEAK';
   return 'OK';
 }
  
+// Normalise to base signal name for styling
+function sigBase(sig) {
+  if (sig === 'MODERATE_LOW') return 'MODERATE';
+  if (sig === 'WEAK_LOW')     return 'WEAK';
+  return sig;
+}
+ 
 // ── TREND DETECTION ───────────────────────────────────────────
-function detectTrend(pts, field, avg) {
+function detectTrend(pts, field, ref) {
   const ids = new Set();
   let dir = null, runStart = 0, runLen = 0;
   pts.forEach((d, i) => {
     const v = d[field]; if (v == null) { dir=null; runLen=0; return; }
-    const d_ = v > avg ? 1 : v < avg ? -1 : 0;
+    const d_ = v > ref ? 1 : v < ref ? -1 : 0;
     if (d_ === 0) { dir=null; runLen=0; return; }
     if (d_ === dir) { runLen++; } else { dir=d_; runStart=i; runLen=1; }
     if (runLen >= 8) for (let j=runStart; j<=i; j++) ids.add(pts[j].id);
@@ -198,80 +236,87 @@ function detectTrend(pts, field, avg) {
   return ids;
 }
  
-const trendX  = detectTrend(DATA, 'tp', AVG_DR);
-const trendMR = detectTrend(mrData, 'mr', AVG_MR);
+const trendX  = detectTrend(DATA,   'tp', MEDIAN_DR);
+const trendMR = detectTrend(mrData, 'mr', MEDIAN_MR);
  
 // ── SIGNAL STYLES ─────────────────────────────────────────────
 const SIG = {
-  STRONG:   { col:'#dc2626', label:'Silny sygnał'        },
-  MODERATE: { col:'#f59e0b', label:'Umiarkowany sygnał'  },
-  WEAK:     { col:'#fb923c', label:'Słaby sygnał'        },
-  TREND:    { col:'#16a34a', label:'Słaby trend (8+)'    },
-  OK:       { col:'#2563eb', label:'W kontroli'          },
+  STRONG:   { col:'#dc2626', label:'Silny sygnał'       },
+  MODERATE: { col:'#f59e0b', label:'Umiarkowany sygnał' },
+  WEAK:     { col:'#fb923c', label:'Słaby sygnał'       },
+  TREND:    { col:'#16a34a', label:'Słaby trend (8+)'   },
+  OK:       { col:'#2563eb', label:'W kontroli'         },
 };
  
-function drawIcon(g, type, cx, cy) {
+// ── DRAW ICON ─────────────────────────────────────────────────
+function drawIcon(g, rawType, cx, cy) {
+  const type = sigBase(rawType);
   const G = g.append('g').attr('transform',`translate(${cx},${cy})`).style('pointer-events','none');
   if (type === 'STRONG') {
-    G.append('circle').attr('r',9).attr('fill','#dc2626').attr('stroke','#fff').attr('stroke-width',1.5);
-    G.append('text').attr('y',5).attr('text-anchor','middle').attr('font-size','13').attr('font-weight','900').attr('fill','#fff').text('!');
+    G.append('circle').attr('r',10).attr('fill','#dc2626').attr('stroke','#fff').attr('stroke-width',1.8);
+    G.append('text').attr('y',5.5).attr('text-anchor','middle').attr('font-size','14').attr('font-weight','900').attr('fill','#fff').text('!');
   } else if (type === 'MODERATE') {
-    G.append('circle').attr('r',9).attr('fill','#f59e0b').attr('stroke','#fff').attr('stroke-width',1.5);
-    G.append('circle').attr('r',4.5).attr('fill','none').attr('stroke','#fff').attr('stroke-width',1.5);
-    G.append('circle').attr('r',1.8).attr('fill','#fff');
+    G.append('circle').attr('r',10).attr('fill','#f59e0b').attr('stroke','#fff').attr('stroke-width',1.8);
+    G.append('circle').attr('r',5).attr('fill','none').attr('stroke','#fff').attr('stroke-width',1.6);
+    G.append('circle').attr('r',2).attr('fill','#fff');
     [0,45,90,135,180,225,270,315].forEach(a => {
       const r=a*Math.PI/180;
       G.append('line')
-        .attr('x1',Math.cos(r)*4.5).attr('y1',Math.sin(r)*4.5)
-        .attr('x2',Math.cos(r)*7.5).attr('y2',Math.sin(r)*7.5)
-        .attr('stroke','#fff').attr('stroke-width',2).attr('stroke-linecap','round');
+        .attr('x1',Math.cos(r)*5).attr('y1',Math.sin(r)*5)
+        .attr('x2',Math.cos(r)*8).attr('y2',Math.sin(r)*8)
+        .attr('stroke','#fff').attr('stroke-width',2.2).attr('stroke-linecap','round');
     });
   } else if (type === 'WEAK') {
-    G.append('polygon').attr('points','0,-10 9,7 -9,7').attr('fill','#fb923c').attr('stroke','#fff').attr('stroke-width',1.2).attr('stroke-linejoin','round');
-    G.append('text').attr('y',6).attr('text-anchor','middle').attr('font-size','11').attr('font-weight','900').attr('fill','#fff').text('!');
+    G.append('polygon').attr('points','0,-11 10,8 -10,8').attr('fill','#fb923c').attr('stroke','#fff').attr('stroke-width',1.4).attr('stroke-linejoin','round');
+    G.append('text').attr('y',6.5).attr('text-anchor','middle').attr('font-size','12').attr('font-weight','900').attr('fill','#fff').text('!');
   } else if (type === 'TREND') {
-    G.append('rect').attr('x',-8).attr('y',-8).attr('width',16).attr('height',16).attr('rx',3).attr('fill','#16a34a').attr('stroke','#fff').attr('stroke-width',1.2);
-    G.append('line').attr('x1',-4).attr('y1',2).attr('x2',0).attr('y2',6).attr('stroke','#fff').attr('stroke-width',2.2).attr('stroke-linecap','round');
-    G.append('line').attr('x1',0).attr('y1',6).attr('x2',5).attr('y2',-3).attr('stroke','#fff').attr('stroke-width',2.2).attr('stroke-linecap','round');
+    G.append('rect').attr('x',-9).attr('y',-9).attr('width',18).attr('height',18).attr('rx',4).attr('fill','#16a34a').attr('stroke','#fff').attr('stroke-width',1.4);
+    G.append('line').attr('x1',-5).attr('y1',2).attr('x2',0).attr('y2',7).attr('stroke','#fff').attr('stroke-width',2.4).attr('stroke-linecap','round');
+    G.append('line').attr('x1',0).attr('y1',7).attr('x2',6).attr('y2',-3).attr('stroke','#fff').attr('stroke-width',2.4).attr('stroke-linecap','round');
   } else {
-    G.append('circle').attr('r',6.5).attr('fill','#2563eb').attr('stroke','#fff').attr('stroke-width',1.5);
+    G.append('circle').attr('r',8).attr('fill','#2563eb').attr('stroke','#fff').attr('stroke-width',1.8);
   }
 }
  
-// ── STATS ─────────────────────────────────────────────────────
+// ── STATS ROW ─────────────────────────────────────────────────
 const statsRow = document.getElementById('statsRow');
+const nStrong = DATA.filter(d => classifyX(d.tp) === 'STRONG').length;
 [
-  { label:'Dni (n)',     value:DATA.length,              col:'#111827' },
-  { label:'Śr. TP/dzień',value:AVG_DR.toFixed(2),       col:'#2563eb' },
-  { label:'UNPL',        value:UNPL.toFixed(2),          col:'#dc2626' },
-  { label:'LNPL',        value:'0 (ujemne→0)',           col:'#16a34a' },
-  { label:'Śr. MR',      value:AVG_MR.toFixed(3),        col:'#7c3aed' },
-  { label:'URL (MR)',     value:URL_MR.toFixed(3),        col:'#ea580c' },
-  { label:'Silne sygnały X', value: DATA.filter(d=>classifyTP(d.tp)==='STRONG').length, col:'#dc2626' },
-  { label:'Trend X',     value: trendX.size > 0 ? 'Tak ✓' : 'Nie', col: trendX.size>0?'#16a34a':'#9ca3af' },
+  { label:'Tygodnie (n)',      value: DATA.length,              sub:'bez weekendów',      col:'#111827' },
+  { label:'Mediana TP/tydz',   value: MEDIAN_DR+' zadań',       sub:'punkt odniesienia',  col:'#2563eb' },
+  { label:'Mediana MR',        value: MEDIAN_MR,                sub:'zakres zmienności',  col:'#7c3aed' },
+  { label:'UNPL',               value: UNPL.toFixed(1),          sub:'+2.66 × med.MR',    col:'#dc2626' },
+  { label:'LNPL',               value:'0 (ujemne→0)',            sub:'-2.66 × med.MR',    col:'#16a34a' },
+  { label:'URL (MR)',            value: URL_MR.toFixed(2),        sub:'3.267 × med.MR',    col:'#ea580c' },
+  { label:'Silne sygnały X',    value: nStrong,                  sub:'powyżej UNPL',       col: nStrong>0?'#dc2626':'#9ca3af' },
 ].forEach(s => {
-  statsRow.innerHTML += `<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value" style="color:${s.col}">${s.value}</div></div>`;
+  statsRow.innerHTML += `<div class="stat-card">
+    <div class="stat-label">${s.label}</div>
+    <div class="stat-value" style="color:${s.col}">${s.value}</div>
+    <div class="stat-sub">${s.sub}</div>
+  </div>`;
 });
  
 // ── TOOLTIP ───────────────────────────────────────────────────
 const tooltip = document.getElementById('tooltip');
 function showTip(ev, html) { tooltip.innerHTML=html; tooltip.style.opacity='1'; moveTip(ev); }
 function moveTip(ev) {
-  let x=ev.clientX+16, y=ev.clientY-12;
-  if (x+240>window.innerWidth) x=ev.clientX-256;
-  if (y+140>window.innerHeight) y=ev.clientY-150;
+  let x=ev.clientX+18, y=ev.clientY-14;
+  if (x+260>window.innerWidth) x=ev.clientX-270;
+  if (y+180>window.innerHeight) y=ev.clientY-180;
   tooltip.style.left=x+'px'; tooltip.style.top=y+'px';
 }
 function hideTip() { tooltip.style.opacity='0'; }
  
 // ── CHART BUILDER ─────────────────────────────────────────────
 function buildChart({ svgId, legendId, pts, field, fieldLabel, unit,
-  avg, avgLabel, avgColor, upper, upperLabel, upperColor,
-  lower, lowerLabel, classify, trendSet }) {
+  ref, refLabel, refColor, upper, upperLabel, upperColor,
+  lower, lowerLabel, classify, trendSet, tipExtra }) {
  
-  const W  = Math.min(1060, window.innerWidth - 80);
-  const H  = 300;
-  const m  = { top:20, right:120, bottom:50, left:58 };
+  const allPts  = DATA;  // use full DATA length for x-axis
+  const W  = Math.min(1000, window.innerWidth - 80);
+  const H  = 320;
+  const m  = { top:22, right:120, bottom:54, left:60 };
   const iW = W - m.left - m.right;
   const iH = H - m.top - m.bottom;
  
@@ -280,31 +325,42 @@ function buildChart({ svgId, legendId, pts, field, fieldLabel, unit,
  
   const visPts = pts.filter(d => d[field] != null);
   const vals   = visPts.map(d => d[field]);
-  const yMax   = Math.max(...vals, upper) * 1.16;
+  const yMax   = Math.max(...vals, upper) * 1.18;
+  const n      = pts.length;
  
-  const xScale = d3.scaleLinear().domain([1, DATA.length]).range([0, iW]);
+  const xScale = d3.scaleLinear().domain([1, n]).range([0, iW]);
   const yScale = d3.scaleLinear().domain([0, yMax]).range([iH, 0]).nice();
  
   // ── ZONE SHADING ─────────────────────────────────────────────
-  const ru = upper - avg;
-  const rd = avg - lower;  // lower = 0 for both charts
-  const z1u = avg+(1/3)*ru, z2u = avg+(2/3)*ru;
-  const z1d = avg-(1/3)*rd, z2d = avg-(2/3)*rd;
+  const ru = upper - ref;
+  const rd = ref - lower;
+  const z1u = ref+(1/3)*ru, z2u = ref+(2/3)*ru;
+  const z1d = ref-(1/3)*rd, z2d = ref-(2/3)*rd;
  
-  // Upper zones
-  g.append('rect').attr('x',0).attr('y',yScale(z2u)).attr('width',iW)
-    .attr('height',Math.max(0,yScale(z1u)-yScale(z2u))).attr('fill','#fb923c').attr('fill-opacity',0.07);
-  g.append('rect').attr('x',0).attr('y',yScale(upper)).attr('width',iW)
-    .attr('height',Math.max(0,yScale(z2u)-yScale(upper))).attr('fill','#dc2626').attr('fill-opacity',0.06);
+  // Upper: weak (orange) + moderate (red)
+  const y_z1u = yScale(z1u), y_z2u = yScale(z2u), y_up = yScale(upper);
+  g.append('rect').attr('x',0).attr('y',y_z2u).attr('width',iW)
+    .attr('height',Math.max(0,y_z1u-y_z2u)).attr('fill','#fb923c').attr('fill-opacity',0.08);
+  g.append('rect').attr('x',0).attr('y',y_up).attr('width',iW)
+    .attr('height',Math.max(0,y_z2u-y_up)).attr('fill','#dc2626').attr('fill-opacity',0.07);
+ 
+  // Lower: weak + moderate (only if lower > 0, else shade toward 0)
+  const y_z1d = yScale(z1d), y_z2d = yScale(z2d);
+  const y_bot = yScale(Math.max(lower, 0));
+  g.append('rect').attr('x',0).attr('y',y_z1d).attr('width',iW)
+    .attr('height',Math.max(0,y_z2d-y_z1d)).attr('fill','#fb923c').attr('fill-opacity',0.08);
+  g.append('rect').attr('x',0).attr('y',y_z2d).attr('width',iW)
+    .attr('height',Math.max(0,y_bot-y_z2d)).attr('fill','#dc2626').attr('fill-opacity',0.07);
  
   // ── GRID ──────────────────────────────────────────────────────
-  g.selectAll('.gl').data(yScale.ticks(6)).enter().append('line')
-    .attr('x1',0).attr('x2',iW).attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
+  g.selectAll('.gl').data(yScale.ticks(7)).enter().append('line')
+    .attr('x1',0).attr('x2',iW)
+    .attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
     .attr('stroke','#f0f0f0').attr('stroke-width',1);
  
   // ── TREND BANDS ───────────────────────────────────────────────
   if (trendSet.size > 0) {
-    const sorted = [...trendSet].sort((a,b)=>a-b);
+    const sorted=[...trendSet].sort((a,b)=>a-b);
     let runs=[], rs=sorted[0], re=sorted[0];
     for (let i=1;i<sorted.length;i++) {
       if (sorted[i]===re+1) re=sorted[i];
@@ -313,104 +369,130 @@ function buildChart({ svgId, legendId, pts, field, fieldLabel, unit,
     runs.push([rs,re]);
     runs.forEach(([s,e]) => {
       g.append('rect')
-        .attr('x',xScale(s)-4).attr('y',0)
-        .attr('width',xScale(e)-xScale(s)+8).attr('height',iH)
-        .attr('fill','#16a34a').attr('fill-opacity',0.09).attr('rx',4);
+        .attr('x',xScale(s)-5).attr('y',0)
+        .attr('width',xScale(e)-xScale(s)+10).attr('height',iH)
+        .attr('fill','#16a34a').attr('fill-opacity',0.1).attr('rx',5);
       g.append('text')
-        .attr('x',(xScale(s)+xScale(e))/2).attr('y',-6)
+        .attr('x',(xScale(s)+xScale(e))/2).attr('y',-7)
         .attr('text-anchor','middle').attr('fill','#16a34a')
-        .attr('font-size','8.5px').attr('font-weight','700').text('trend');
+        .attr('font-size','9px').attr('font-weight','700').text('trend');
     });
   }
  
   // ── REFERENCE LINES ───────────────────────────────────────────
   const refs = [
-    { val:upper, col:upperColor, lbl:upperLabel, dash:'7 4', w:1.8 },
-    { val:avg,   col:avgColor,   lbl:avgLabel,   dash:null,  w:2.2 },
-    { val:z2u,   col:'#f59e0b',  lbl:'2/3',      dash:'4 3', w:1.1 },
-    { val:z1u,   col:'#fb923c',  lbl:'1/3',      dash:'3 3', w:1 },
+    { val:upper, col:upperColor, lbl:upperLabel,     dash:'8 4', w:2 },
+    { val:ref,   col:refColor,   lbl:refLabel,        dash:null,  w:2.4 },
+    { val:z2u,   col:'#f59e0b',  lbl:'2/3↑',          dash:'4 3', w:1.2 },
+    { val:z1u,   col:'#fb923c',  lbl:'1/3↑',          dash:'3 4', w:1 },
+    { val:z1d,   col:'#fb923c',  lbl:'1/3↓',          dash:'3 4', w:1 },
+    { val:z2d,   col:'#f59e0b',  lbl:'2/3↓',          dash:'4 3', w:1.2 },
+    ...(lower>0 ? [{ val:lower, col:lowerLabel==='LNPL'?'#16a34a':'#9ca3af', lbl:lowerLabel, dash:'8 4', w:2 }] : []),
   ];
+ 
   refs.forEach(({ val, col, lbl, dash, w }) => {
-    if (val < 0) return;
+    if (val < 0 || val === undefined) return;
     const y = yScale(val);
     g.append('line').attr('x1',0).attr('x2',iW).attr('y1',y).attr('y2',y)
-      .attr('stroke',col).attr('stroke-width',w).attr('stroke-dasharray',dash||'none').attr('opacity',0.9);
-    g.append('text').attr('x',iW+5).attr('y',y+4)
+      .attr('stroke',col).attr('stroke-width',w).attr('stroke-dasharray',dash||'none').attr('opacity',0.88);
+    g.append('text').attr('x',iW+6).attr('y',y+4)
       .attr('fill',col).attr('font-size','10px').attr('font-weight','700')
-      .text(`${lbl}=${val.toFixed(2)}`);
+      .text(`${lbl}=${val.toFixed(1)}`);
   });
  
   // ── CONNECTING LINE ────────────────────────────────────────────
-  g.append('path').datum(visPts).attr('fill','none')
-    .attr('stroke','#cbd5e1').attr('stroke-width',1.5)
+  g.append('path').datum(visPts)
+    .attr('fill','none').attr('stroke','#cbd5e1').attr('stroke-width',2)
     .attr('d', d3.line().x(d=>xScale(d.id)).y(d=>yScale(d[field])));
+ 
+  // ── VALUE LABELS on points ────────────────────────────────────
+  visPts.forEach(d => {
+    const cx = xScale(d.id);
+    const cy = yScale(d[field]);
+    g.append('text')
+      .attr('x',cx).attr('y',cy-14)
+      .attr('text-anchor','middle').attr('fill','#374151')
+      .attr('font-size','10px').attr('font-weight','700')
+      .text(d[field]);
+  });
  
   // ── DOTS + ICONS ──────────────────────────────────────────────
   visPts.forEach(d => {
     const cx  = xScale(d.id);
     const cy  = yScale(d[field]);
-    const sig = trendSet.has(d.id) ? 'TREND' : classify(d[field]);
+    const raw = trendSet.has(d.id) ? 'TREND' : classify(d[field]);
+    const sig = sigBase(raw);
     const s   = SIG[sig];
  
     const sigBadge = sig!=='OK'
       ? `<span class="sig-badge" style="background:${s.col}22;color:${s.col};border:1px solid ${s.col}44">${s.label}</span>` : '';
  
-    const tipHtml = `<strong>#${d.id} · ${d.date}</strong>
-      <div class="tt-row"><span>${fieldLabel}:</span><span style="color:#93c5fd;font-weight:700">${d[field]} ${unit}</span></div>
-      <div class="tt-row"><span>Średnia (${avgLabel}):</span><span>${avg.toFixed(4)} ${unit}</span></div>
-      <div class="tt-row"><span>${upperLabel}:</span><span style="color:#fca5a5">${upper.toFixed(4)} ${unit}</span></div>
+    const extra = tipExtra ? tipExtra(d) : '';
+ 
+    const tipHtml = `<strong>Tydzień #${d.id} · ${d.label||d.week}</strong>
+      <div class="tt-row"><span>${fieldLabel}:</span><span style="color:#93c5fd;font-weight:700">${d[field]}${unit?' '+unit:''}</span></div>
+      ${d.days!=null?`<div class="tt-row"><span>Dni roboczych:</span><span>${d.days}</span></div>`:''}
+      <div class="tt-div"></div>
+      <div class="tt-row"><span>Mediana (${refLabel}):</span><span>${ref}</span></div>
+      <div class="tt-row"><span>${upperLabel}:</span><span style="color:#fca5a5">${upper.toFixed(1)}</span></div>
       <div class="tt-row"><span>LNPL:</span><span style="color:#86efac">0 (ujemne→0)</span></div>
+      ${extra}
       ${sigBadge}`;
  
-    // Invisible hover area
-    g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',14)
+    // Hover zone
+    g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',18)
       .attr('fill','transparent').style('cursor','pointer')
-      .on('mousemove', ev => showTip(ev, tipHtml))
+      .on('mousemove', ev=>showTip(ev,tipHtml))
       .on('mouseout', hideTip);
  
-    drawIcon(g, sig, cx, cy);
+    drawIcon(g, raw, cx, cy);
   });
  
   // ── X AXIS ────────────────────────────────────────────────────
-  // Show tick every 7 points (approx weekly)
-  const tickIds = visPts.filter((_,i) => i===0 || i===visPts.length-1 || i%7===0).map(d=>d.id);
   g.append('g').attr('transform',`translate(0,${iH})`)
-    .call(d3.axisBottom(xScale).tickValues(tickIds).tickFormat(id => {
-      const d = visPts.find(p=>p.id===id);
-      return d ? d.date.slice(5) : id;
-    }))
+    .call(d3.axisBottom(xScale)
+      .tickValues(visPts.map(d=>d.id))
+      .tickFormat(id => `W${id}`)
+    )
     .call(ax => {
       ax.select('.domain').attr('stroke','#d1d5db');
       ax.selectAll('line').attr('stroke','#d1d5db');
       ax.selectAll('text').attr('fill','#6b7280').attr('font-size','10px').attr('dy','1.2em');
     });
  
+  // Date range below tick
+  g.selectAll('.xdt').data(visPts).enter().append('text').attr('class','xdt')
+    .attr('x',d=>xScale(d.id)).attr('y',iH+32)
+    .attr('text-anchor','middle').attr('fill','#9ca3af').attr('font-size','8.5px')
+    .text(d=>d.label||d.week);
+ 
   // ── Y AXIS ────────────────────────────────────────────────────
   g.append('g')
-    .call(d3.axisLeft(yScale).ticks(6).tickFormat(d => d+(unit?' '+unit:'')))
-    .call(ax => {
+    .call(d3.axisLeft(yScale).ticks(7).tickFormat(d=>d+(unit?' '+unit:'')))
+    .call(ax=>{
       ax.select('.domain').attr('stroke','#d1d5db');
       ax.selectAll('line').attr('stroke','#d1d5db');
       ax.selectAll('text').attr('fill','#6b7280').attr('font-size','10px');
     });
  
-  g.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-44)
+  g.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-46)
     .attr('text-anchor','middle').attr('fill','#9ca3af').attr('font-size','10px')
-    .text(fieldLabel + (unit?' ('+unit+')':''));
+    .text(fieldLabel+(unit?' ('+unit+')':''));
  
   // ── LEGEND ────────────────────────────────────────────────────
   const legEl = document.getElementById(legendId);
-  legEl.innerHTML = '';
+  legEl.innerHTML='';
   [
-    { label:`Średnia (${avgLabel}) = ${avg.toFixed(4)}`, col:avgColor, h:3 },
-    { label:`${upperLabel} = ${upper.toFixed(4)}`, col:upperColor, dash:true },
-    { label:'Strefa umiarkowana (2/3)', col:'#f59e0b', dash:true },
-    { label:'Strefa słaba (1/3)',       col:'#fb923c', dash:true },
-    { label:'Trend (8+ po jednej stronie)', col:'#16a34a', band:true },
+    { label:`Mediana (${refLabel}) = ${ref}`, col:refColor, h:3 },
+    { label:`${upperLabel} = ${upper.toFixed(1)}`, col:upperColor, dash:true },
+    ...(lower>0?[{ label:`${lowerLabel} = ${lower.toFixed(1)}`, col:'#16a34a', dash:true }]:[]),
+    { label:'Strefa 2/3 (umiarkowana)', col:'#f59e0b', dash:true },
+    { label:'Strefa 1/3 (słaba)',       col:'#fb923c', dash:true },
+    { label:'Trend (8+ po jednej stronie mediany)', col:'#16a34a', band:true },
   ].forEach(l => {
-    const item = document.createElement('div'); item.className='leg-item';
+    const item=document.createElement('div'); item.className='leg-item';
     if (l.band) {
-      item.innerHTML=`<div style="width:20px;height:10px;background:#16a34a;opacity:0.18;border:1px solid #16a34a;border-radius:2px;flex-shrink:0"></div><span>${l.label}</span>`;
+      item.innerHTML=`<div style="width:20px;height:11px;background:#16a34a;opacity:0.2;border:1px solid #16a34a;border-radius:2px;flex-shrink:0"></div><span>${l.label}</span>`;
     } else if (l.dash) {
       item.innerHTML=`<div style="width:22px;height:0;border-top:2px dashed ${l.col};flex-shrink:0"></div><span>${l.label}</span>`;
     } else {
@@ -420,25 +502,28 @@ function buildChart({ svgId, legendId, pts, field, fieldLabel, unit,
   });
 }
  
-// ── BUILD CHARTS ──────────────────────────────────────────────
+// ── BUILD X CHART ─────────────────────────────────────────────
 buildChart({
   svgId:'xChart', legendId:'xLegend',
-  pts: DATA, field:'tp', fieldLabel:'Throughput', unit:'zadań/dzień',
-  avg: AVG_DR, avgLabel:'T̄P', avgColor:'#2563eb',
+  pts: DATA, field:'tp', fieldLabel:'Throughput', unit:'zadań',
+  ref: MEDIAN_DR, refLabel:'Med.DR', refColor:'#2563eb',
   upper: UNPL, upperLabel:'UNPL', upperColor:'#dc2626',
   lower: LNPL, lowerLabel:'LNPL',
-  classify: classifyTP,
+  classify: classifyX,
   trendSet: trendX,
+  tipExtra: d => `<div class="tt-row"><span>Moving Range:</span><span>${d.mr!=null?d.mr:'—'}</span></div>`,
 });
  
+// ── BUILD MR CHART ────────────────────────────────────────────
 buildChart({
   svgId:'mrChart', legendId:'mrLegend',
   pts: mrData, field:'mr', fieldLabel:'Moving Range', unit:'',
-  avg: AVG_MR, avgLabel:'MR̄', avgColor:'#7c3aed',
+  ref: MEDIAN_MR, refLabel:'Med.MR', refColor:'#7c3aed',
   upper: URL_MR, upperLabel:'URL', upperColor:'#ea580c',
   lower: LRL_MR, lowerLabel:'LRL',
   classify: classifyMR,
   trendSet: trendMR,
+  tipExtra: null,
 });
 </script>
 </body>
