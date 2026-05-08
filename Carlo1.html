@@ -1,597 +1,756 @@
+Monte carlo unified · HTML
+Copy
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monte Carlo · Analiza wzrostu zakresu</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Monte Carlo · Prognoza Zakresu</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Epilogue:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
 :root {
-  --bg:      #f7f5f2;
-  --surface: #ffffff;
-  --border:  #e8e4de;
-  --text:    #1a1714;
-  --muted:   #7a7470;
-  --mono:    'DM Mono', monospace;
+  --bg:        #f0ede8;
+  --surface:   #faf9f7;
+  --card:      #ffffff;
+  --border:    #e2ddd6;
+  --text:      #18160f;
+  --muted:     #8a8278;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Epilogue', sans-serif;
+  --display:   'Syne', sans-serif;
  
-  --c-base:  #1d3557;
-  --c-20:    #e07b39;
-  --c-25:    #d44f6e;
-  --c-30:    #7c3aed;
+  --c0: #1a2e44;   /* base */
+  --c1: #c0632a;   /* +20% */
+  --c2: #b83460;   /* +25% */
+  --c3: #5b34b8;   /* +30% */
  
-  --p50:  #2196f3;
-  --p85:  #f59e0b;
-  --p95:  #ef4444;
+  --p50: #0e87d4;
+  --p85: #d4870e;
+  --p95: #d43c0e;
 }
  
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  padding: 28px 24px;
+  font-family: var(--sans);
+  min-height: 100vh;
+  padding: 24px 28px;
 }
  
-/* HEADER */
+/* ── HEADER ── */
 .header {
-  display: flex; justify-content: space-between; align-items: flex-end;
-  margin-bottom: 28px; padding-bottom: 20px;
-  border-bottom: 2px solid var(--text);
-  flex-wrap: wrap; gap: 12px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 24px; gap: 16px; flex-wrap: wrap;
 }
-.header h1 {
-  font-family: 'DM Serif Display', serif;
-  font-size: 1.9rem; font-weight: 400;
-  letter-spacing: -0.02em; line-height: 1.15;
-}
-.header p { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
-.badge {
-  background: var(--text); color: #f7f5f2;
-  font-family: var(--mono); font-size: 0.7rem; padding: 5px 12px;
-  border-radius: 4px; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
-}
- 
-/* SCENARIO LEGEND */
-.scenario-legend {
-  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
-}
-.sc-chip {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 9px 16px; font-size: 0.8rem;
-}
-.sc-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
-.sc-name { font-weight: 600; }
-.sc-desc { color: var(--muted); font-size: 0.73rem; margin-top: 1px; }
- 
-/* SUMMARY COMPARISON TABLE */
-.summary-section { margin-bottom: 24px; }
-.section-title {
-  font-size: 0.7rem; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;
-}
- 
-.compare-table {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; overflow: hidden;
-}
-.ct-header {
-  display: grid; grid-template-columns: 1.6fr repeat(4,1fr);
-  background: var(--bg); border-bottom: 2px solid var(--border);
-  padding: 0;
-}
-.ct-header-cell {
-  padding: 10px 14px; font-size: 0.7rem; font-weight: 700;
-  color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
-  display: flex; align-items: center; gap: 7px;
-}
-.ct-row {
-  display: grid; grid-template-columns: 1.6fr repeat(4,1fr);
-  border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
-.ct-row:last-child { border-bottom: none; }
-.ct-row:hover { background: var(--bg); }
-.ct-cell {
-  padding: 12px 14px; font-size: 0.82rem;
-  display: flex; align-items: center;
-}
-.ct-cell.label {
-  font-weight: 600; color: var(--muted);
-  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
-}
-.ct-val {
-  font-family: var(--mono); font-size: 0.88rem; font-weight: 500;
+.header-left h1 {
+  font-family: var(--display);
+  font-size: 1.75rem; font-weight: 800;
+  letter-spacing: -0.03em; line-height: 1.1;
   color: var(--text);
 }
-.ct-date {
-  font-family: var(--mono); font-size: 0.75rem; color: var(--muted); margin-top: 2px;
-}
-.pct-tag {
-  display: inline-block; padding: 2px 7px; border-radius: 12px;
-  font-family: var(--mono); font-size: 0.68rem; font-weight: 600;
-  color: white; margin-right: 4px;
-}
-.p50-bg { background: var(--p50); }
-.p85-bg { background: var(--p85); }
-.p95-bg { background: var(--p95); }
+.header-left p { font-size: 0.78rem; color: var(--muted); margin-top: 5px; font-weight: 400; }
+.header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
  
-/* CHART SECTIONS */
-.charts-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 16px; margin-bottom: 24px;
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 6px; font-size: 0.78rem;
+  font-family: var(--display); font-weight: 600; cursor: pointer;
+  border: none; transition: all 0.15s; white-space: nowrap;
 }
-@media(max-width:800px){ .charts-row { grid-template-columns: 1fr; } }
+.btn-primary { background: var(--text); color: #faf9f7; }
+.btn-primary:hover { background: #2a2820; }
+.btn-outline { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg); }
+.btn-active { background: var(--text); color: #faf9f7; }
  
-.chart-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px;
+/* ── FILTER BAR ── */
+.filter-bar {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 18px;
+  display: flex; gap: 12px; align-items: center;
+  margin-bottom: 18px; flex-wrap: wrap;
 }
-.chart-card-title { font-size: 0.78rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-.chart-card-sub { font-size: 0.7rem; color: var(--muted); margin-bottom: 14px; }
+.filter-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.filter-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
  
-/* IMPACT CALLOUT */
-.impact-row {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 14px; margin-bottom: 24px;
+.filter-chip {
+  padding: 5px 12px; border-radius: 20px; font-size: 0.76rem;
+  font-family: var(--display); font-weight: 600; cursor: pointer;
+  border: 1.5px solid var(--border); background: var(--bg);
+  color: var(--muted); transition: all 0.13s;
 }
-@media(max-width:700px){ .impact-row { grid-template-columns: 1fr; } }
+.filter-chip:hover { border-color: var(--text); color: var(--text); }
+.filter-chip.active { background: var(--text); color: #faf9f7; border-color: var(--text); }
  
-.impact-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 18px 20px;
-  position: relative; overflow: hidden;
+.filter-input {
+  padding: 5px 10px; border-radius: 6px; font-size: 0.76rem;
+  border: 1.5px solid var(--border); background: var(--bg);
+  color: var(--text); font-family: var(--mono); outline: none;
+  transition: border-color 0.13s;
 }
-.impact-card::after {
-  content: ''; position: absolute;
-  bottom: 0; left: 0; right: 0; height: 3px;
+.filter-input:focus { border-color: var(--text); }
+ 
+/* ── SCENARIO STRIPS ── */
+.scenario-row {
+  display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
 }
-.impact-card.c0::after { background: var(--c-base); }
-.impact-card.c1::after { background: var(--c-20); }
-.impact-card.c2::after { background: var(--c-25); }
-.impact-card.c3::after { background: var(--c-30); }
+.sc-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 8px;
+  background: var(--card); border: 1.5px solid var(--border);
+  font-size: 0.78rem; cursor: pointer; transition: all 0.13s;
+  user-select: none;
+}
+.sc-pill:hover { border-color: var(--text); }
+.sc-pill.active { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+.sc-pill.dimmed { opacity: 0.4; }
+.sc-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.sc-name { font-family: var(--display); font-weight: 700; font-size: 0.8rem; }
+.sc-sub { font-size: 0.7rem; color: var(--muted); }
  
-.ic-label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
-.ic-main { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--text); line-height: 1.1; }
-.ic-sub { font-size: 0.73rem; color: var(--muted); margin-top: 4px; }
-.ic-delta { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 6px; }
-.delta-warn { background: #fef3c7; color: #b45309; }
-.delta-danger { background: #fde8ed; color: #be2b50; }
+/* ── MAIN CHART CARD ── */
+.main-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 22px 22px 16px;
+  margin-bottom: 18px;
+}
+.card-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+}
+.card-title { font-family: var(--display); font-size: 0.88rem; font-weight: 700; }
+.card-sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
  
-/* TOOLTIP */
+/* percentile toggle */
+.pct-toggle { display: flex; gap: 6px; }
+.pct-btn {
+  padding: 4px 11px; border-radius: 4px; font-size: 0.72rem;
+  font-family: var(--mono); font-weight: 500; cursor: pointer;
+  border: 1.5px solid var(--border); background: var(--bg);
+  color: var(--muted); transition: all 0.13s;
+}
+.pct-btn:hover { border-color: var(--text); color: var(--text); }
+.pct-btn[data-p="50"].on { background: var(--p50); color: #fff; border-color: var(--p50); }
+.pct-btn[data-p="85"].on { background: var(--p85); color: #fff; border-color: var(--p85); }
+.pct-btn[data-p="95"].on { background: var(--p95); color: #fff; border-color: var(--p95); }
+ 
+/* ── STAT CARDS ── */
+.stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 110px;
+}
+.stat-lbl { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+.stat-val { font-family: var(--display); font-size: 1.3rem; font-weight: 800; margin-top: 3px; }
+.stat-sub { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
+ 
+/* ── ADD DATA PANEL ── */
+.add-panel {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  margin-bottom: 18px; display: none;
+}
+.add-panel.open { display: block; }
+.add-panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.add-panel-title { font-family: var(--display); font-size: 0.88rem; font-weight: 700; }
+.add-panel-close { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.1rem; padding: 2px 6px; border-radius: 4px; }
+.add-panel-close:hover { background: var(--border); }
+.add-panel-body { padding: 20px; }
+ 
+.add-form { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.form-field { display: flex; flex-direction: column; gap: 5px; }
+.form-field label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.form-field input, .form-field select {
+  padding: 8px 12px; border-radius: 6px; font-size: 0.82rem;
+  border: 1.5px solid var(--border); background: var(--bg);
+  color: var(--text); font-family: var(--sans); outline: none;
+  transition: border-color 0.13s; min-width: 130px;
+}
+.form-field input:focus, .form-field select:focus { border-color: var(--text); background: #fff; }
+.form-hint { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+ 
+.add-status { font-size: 0.76rem; margin-top: 10px; padding: 7px 12px; border-radius: 6px; display: none; }
+.add-status.ok { display: block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.add-status.err { display: block; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+ 
+/* scenarios list */
+.scenarios-list { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+.sl-title { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+.sl-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.sl-table th { text-align: left; padding: 6px 10px; font-size: 0.67rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+.sl-table td { padding: 8px 10px; border-bottom: 1px solid #f5f3ef; }
+.sl-table tr:last-child td { border-bottom: none; }
+.sl-table tr:hover td { background: var(--bg); }
+.del-btn { background: none; border: none; cursor: pointer; color: #ef4444; font-size: 1rem; padding: 1px 5px; border-radius: 3px; }
+.del-btn:hover { background: #fee2e2; }
+.color-swatch-sm { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+ 
+/* tooltip */
 .tooltip {
-  position: fixed; background: var(--text); color: #f5f3f0;
-  border-radius: 7px; padding: 8px 12px; font-size: 0.73rem;
+  position: fixed; background: var(--text); color: #faf9f7;
+  border-radius: 7px; padding: 9px 13px; font-size: 0.73rem;
   pointer-events: none; opacity: 0; transition: opacity 0.1s;
-  z-index:200; font-family: var(--mono);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.22); white-space: nowrap;
-}
- 
-/* FOOTNOTE */
-.footnote {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 14px 18px;
-  font-size: 0.72rem; color: var(--muted); line-height: 1.7;
+  z-index: 300; font-family: var(--mono);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25); white-space: nowrap;
+  line-height: 1.6;
 }
 </style>
 </head>
 <body>
  
 <div class="header">
-  <div>
-    <h1>Wpływ wzrostu zakresu<br>na prognozę backlogu</h1>
-    <p>Porównanie 4 scenariuszy · 100 000 symulacji każdy · start 1 czerwca 2026</p>
+  <div class="header-left">
+    <h1>Monte Carlo · Prognoza Zakresu</h1>
+    <p>Symulacja 100 000 iteracji · sprinty 2-tygodniowe · start 1 czerwca 2026</p>
   </div>
-  <div class="badge">Monte Carlo · n=100 000</div>
-</div>
- 
-<!-- Scenario legend -->
-<div class="scenario-legend">
-  <div class="sc-chip">
-    <div class="sc-dot" style="background:var(--c-base)"></div>
-    <div><div class="sc-name">Bazowy</div><div class="sc-desc">62 elementy · bez wzrostu</div></div>
-  </div>
-  <div class="sc-chip">
-    <div class="sc-dot" style="background:var(--c-20)"></div>
-    <div><div class="sc-name">+20% wzrostu</div><div class="sc-desc">74 elementy · optymistyczny</div></div>
-  </div>
-  <div class="sc-chip">
-    <div class="sc-dot" style="background:var(--c-25)"></div>
-    <div><div class="sc-name">+25% wzrostu</div><div class="sc-desc">77 elementów · środkowy</div></div>
-  </div>
-  <div class="sc-chip">
-    <div class="sc-dot" style="background:var(--c-30)"></div>
-    <div><div class="sc-name">+30% wzrostu</div><div class="sc-desc">80 elementów · pesymistyczny</div></div>
+  <div class="header-right">
+    <button class="btn btn-outline" id="addBtn">+ Dodaj scenariusz</button>
+    <button class="btn btn-primary" id="runBtn">⟳ Przelicz</button>
   </div>
 </div>
  
-<!-- Impact cards - P85 completion -->
-<div class="section-title">Kluczowy wpływ — data ukończenia P85 (zalecana data commitment)</div>
-<div class="impact-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px">
-  <div class="impact-card c0">
-    <div class="ic-label">Bazowy · 62 elem.</div>
-    <div class="ic-main">25 sty 2027</div>
-    <div class="ic-sub">17 sprintów · P85</div>
-    <div class="ic-delta" style="background:#e8f5e9;color:#1b5e20">punkt odniesienia</div>
+<!-- Filter bar -->
+<div class="filter-bar">
+  <span class="filter-label">Filtruj widok:</span>
+  <div class="filter-group">
+    <span class="filter-label" style="font-size:0.67rem">Zakres:</span>
+    <button class="filter-chip active" data-view="completion">Ukończenie backlogu</button>
+    <button class="filter-chip" data-view="august">Dostarczenie do 31.08</button>
+    <button class="filter-chip" data-view="both">Oba</button>
   </div>
-  <div class="impact-card c1">
-    <div class="ic-label">+20% · 74 elem.</div>
-    <div class="ic-main">8 mar 2027</div>
-    <div class="ic-sub">20 sprintów · P85</div>
-    <div class="ic-delta delta-warn">+6 tygodni ⚠</div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <span class="filter-label" style="font-size:0.67rem">Sprint start:</span>
+    <button class="filter-chip active" data-sprint="1">S1 (cze 2026)</button>
+    <button class="filter-chip" data-sprint="3">S3</button>
+    <button class="filter-chip" data-sprint="5">S5</button>
+    <input type="date" class="filter-input" id="startDateInput" value="2026-06-01" title="Data startu symulacji">
   </div>
-  <div class="impact-card c2">
-    <div class="ic-label">+25% · 77 elem.</div>
-    <div class="ic-main">8 mar 2027</div>
-    <div class="ic-sub">20 sprintów · P85</div>
-    <div class="ic-delta delta-warn">+6 tygodni ⚠</div>
-  </div>
-  <div class="impact-card c3">
-    <div class="ic-label">+30% · 80 elem.</div>
-    <div class="ic-main">22 mar 2027</div>
-    <div class="ic-sub">21 sprintów · P85</div>
-    <div class="ic-delta delta-danger">+8 tygodni ⛔</div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <span class="filter-label" style="font-size:0.67rem">Horyzont:</span>
+    <button class="filter-chip" data-horizon="month">Miesiąc</button>
+    <button class="filter-chip" data-horizon="quarter">Kwartał</button>
+    <button class="filter-chip active" data-horizon="all">Wszystko</button>
   </div>
 </div>
  
-<!-- Summary comparison table -->
-<div class="summary-section">
-  <div class="section-title">Tabela porównawcza — ukończenie backlogu (liczba sprintów)</div>
-  <div class="compare-table">
-    <div class="ct-header">
-      <div class="ct-header-cell">Percentyl</div>
-      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-base);border-radius:2px"></div>Bazowy (62)</div>
-      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-20);border-radius:2px"></div>+20% (74)</div>
-      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-25);border-radius:2px"></div>+25% (77)</div>
-      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-30);border-radius:2px"></div>+30% (80)</div>
-    </div>
-    <div class="ct-row">
-      <div class="ct-cell label"><span class="pct-tag p50-bg">P50</span>50% pewności</div>
-      <div class="ct-cell"><div><div class="ct-val">S15</div><div class="ct-date">28 gru 2026</div></div></div>
-      <div class="ct-cell"><div><div class="ct-val">S18</div><div class="ct-date">8 lut 2027</div></div></div>
-      <div class="ct-cell"><div><div class="ct-val">S19</div><div class="ct-date">22 lut 2027</div></div></div>
-      <div class="ct-cell"><div><div class="ct-val">S19</div><div class="ct-date">22 lut 2027</div></div></div>
-    </div>
-    <div class="ct-row">
-      <div class="ct-cell label"><span class="pct-tag p85-bg">P85</span>Zalecana data</div>
-      <div class="ct-cell"><div><div class="ct-val">S17</div><div class="ct-date">25 sty 2027</div></div></div>
-      <div class="ct-cell"><div><div class="ct-val">S20</div><div class="ct-date">8 mar 2027</div></div></div>
-      <div class="ct-cell"><div><div class="ct-val">S20</div><div class="ct-date">8 mar 2027</div></div></div>
-      <div class="ct-cell"><div><div class="ct-val">S21</div><div class="ct-date">22 mar 2027</div></div></div>
-    </div>
-    <div class="ct-row">
-      <div class="ct-cell label"><span class="pct-tag p95-bg">P95</span>Wysoka pewność</div>
-      <div class="ct-cell"><div><div class="ct-val">S17</div><div class="ct-date">25 sty 2027</div></div></div>
-      <div class="ct-cell"><div><div class="ct-val">S20</div><div class="ct-date">8 mar 2027</div></div></div>
-      <div class="ct-cell"><div><div class="ct-val">S21</div><div class="ct-date">22 mar 2027</div></div></div>
-      <div class="ct-cell"><div><div class="ct-val">S22</div><div class="ct-date">5 kwi 2027</div></div></div>
-    </div>
+<!-- Add panel -->
+<div class="add-panel" id="addPanel">
+  <div class="add-panel-header">
+    <div class="add-panel-title">Dodaj scenariusz</div>
+    <button class="add-panel-close" id="closePanelBtn">✕</button>
   </div>
-</div>
+  <div class="add-panel-body">
+    <div class="add-form">
+      <div class="form-field">
+        <label>Nazwa scenariusza</label>
+        <input type="text" id="fName" placeholder="np. +35% wzrostu" />
+      </div>
+      <div class="form-field">
+        <label>Backlog (elem.)</label>
+        <input type="number" id="fBacklog" placeholder="np. 85" min="1" />
+        <div class="form-hint">Liczba elementów do dostarczenia</div>
+      </div>
+      <div class="form-field">
+        <label>% wzrostu zakresu</label>
+        <input type="number" id="fGrowth" placeholder="np. 35" min="0" max="200" step="1" />
+        <div class="form-hint">Opcjonalnie — wylicza backlog automatycznie</div>
+      </div>
+      <div class="form-field">
+        <label>Kolor</label>
+        <input type="color" id="fColor" value="#2d7d46" style="min-width:60px;height:37px;cursor:pointer;padding:2px" />
+      </div>
+      <div class="form-field">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" id="fSubmit">Dodaj scenariusz</button>
+      </div>
+    </div>
+    <div class="add-status" id="addStatus"></div>
  
-<!-- August scope delivery -->
-<div class="summary-section">
-  <div class="section-title">Tabela porównawcza — elementy dostarczone do 31 sierpnia 2026 (6 sprintów)</div>
-  <div class="compare-table">
-    <div class="ct-header">
-      <div class="ct-header-cell">Percentyl</div>
-      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-base);border-radius:2px"></div>Bazowy (62)</div>
-      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-20);border-radius:2px"></div>+20% (74)</div>
-      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-25);border-radius:2px"></div>+25% (77)</div>
-      <div class="ct-header-cell"><div class="sc-dot" style="background:var(--c-30);border-radius:2px"></div>+30% (80)</div>
-    </div>
-    <div class="ct-row">
-      <div class="ct-cell label"><span class="pct-tag p50-bg">P50</span>Mediana</div>
-      <div class="ct-cell"><div class="ct-val">25 elem.</div></div>
-      <div class="ct-cell"><div class="ct-val">25 elem.</div></div>
-      <div class="ct-cell"><div class="ct-val">25 elem.</div></div>
-      <div class="ct-cell"><div class="ct-val">25 elem.</div></div>
-    </div>
-    <div class="ct-row">
-      <div class="ct-cell label"><span class="pct-tag p85-bg">P85</span>Optymistyczny</div>
-      <div class="ct-cell"><div class="ct-val">29 elem.</div></div>
-      <div class="ct-cell"><div class="ct-val">29 elem.</div></div>
-      <div class="ct-cell"><div class="ct-val">28 elem.</div></div>
-      <div class="ct-cell"><div class="ct-val">29 elem.</div></div>
-    </div>
-    <div class="ct-row">
-      <div class="ct-cell label"><span class="pct-tag p95-bg">P95</span>Bardzo optymist.</div>
-      <div class="ct-cell"><div class="ct-val">30 elem.</div></div>
-      <div class="ct-cell"><div class="ct-val">30 elem.</div></div>
-      <div class="ct-cell"><div class="ct-val">30 elem.</div></div>
-      <div class="ct-cell"><div class="ct-val">30 elem.</div></div>
-    </div>
-    <div class="ct-row" style="background:#fef2f2">
-      <div class="ct-cell label" style="color:#dc2626">Szansa na 100%</div>
-      <div class="ct-cell"><div class="ct-val" style="color:#dc2626">0%</div></div>
-      <div class="ct-cell"><div class="ct-val" style="color:#dc2626">0%</div></div>
-      <div class="ct-cell"><div class="ct-val" style="color:#dc2626">0%</div></div>
-      <div class="ct-cell"><div class="ct-val" style="color:#dc2626">0%</div></div>
+    <div class="scenarios-list">
+      <div class="sl-title">Aktywne scenariusze</div>
+      <table class="sl-table" id="scTable">
+        <thead>
+          <tr>
+            <th>Scenariusz</th>
+            <th>Backlog</th>
+            <th>Wzrost %</th>
+            <th>P50 (sprinty)</th>
+            <th>P85 (sprinty)</th>
+            <th>P95 (sprinty)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="scTableBody"></tbody>
+      </table>
     </div>
   </div>
 </div>
  
-<!-- Charts row 1: Sprint completion grouped bar -->
-<div class="charts-row" style="grid-template-columns:1fr">
-  <div class="chart-card">
-    <div class="chart-card-title">Liczba sprintów do ukończenia — porównanie P50 / P85 / P95</div>
-    <div class="chart-card-sub">Słupki pogrupowane per scenariusz · im wyżej, tym dłużej trwa · start: 1 czerwca 2026</div>
-    <svg id="sprintCompChart"></svg>
-  </div>
-</div>
+<!-- Scenario pills -->
+<div class="scenario-row" id="scenarioRow"></div>
  
-<!-- Charts row 2: two charts side by side -->
-<div class="charts-row">
-  <div class="chart-card">
-    <div class="chart-card-title">Data ukończenia P85 — porównanie scenariuszy</div>
-    <div class="chart-card-sub">Zalecana data commitment dla każdego scenariusza wzrostu</div>
-    <svg id="dateChart"></svg>
-  </div>
-  <div class="chart-card">
-    <div class="chart-card-title">Rozkład liczby sprintów — wszystkie scenariusze</div>
-    <div class="chart-card-sub">Nakładające się rozkłady prawdopodobieństwa (skumulowane)</div>
-    <svg id="cumCompChart"></svg>
-  </div>
-</div>
+<!-- Stats -->
+<div class="stats-row" id="statsRow"></div>
  
-<!-- Aug items chart -->
-<div class="charts-row" style="grid-template-columns:1fr">
-  <div class="chart-card">
-    <div class="chart-card-title">Elementy dostarczone do 31 sierpnia 2026 — P50 / P85 / P95 per scenariusz</div>
-    <div class="chart-card-sub">Wyniki są zbliżone we wszystkich scenariuszach — tempo dostaw jest tym samym czynnikiem · backlog nie ma wpływu na sierpień</div>
-    <svg id="augCompChart"></svg>
+<!-- Main chart -->
+<div class="main-card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">Porównanie scenariuszy — liczba sprintów / elementy dostarczone</div>
+      <div class="card-sub" id="chartSubtitle">Grupowane słupki P50 / P85 / P95 · jeden wykres · wszystkie scenariusze</div>
+    </div>
+    <div class="pct-toggle">
+      <button class="pct-btn on" data-p="50">P50</button>
+      <button class="pct-btn on" data-p="85">P85</button>
+      <button class="pct-btn on" data-p="95">P95</button>
+    </div>
   </div>
-</div>
- 
-<div class="footnote">
-  <strong>Ważna obserwacja:</strong> Wyniki dla sierpnia 2026 są niemal identyczne we wszystkich scenariuszach (~25 elementów P50, ~29 P85).
-  Wynika to z tego, że <strong>przy 6 sprintach zespół nie zdąży wyczyścić nawet bazowego backlogu</strong> — wzrost zakresu nie zmienia wyniku sierpniowego.
-  Wzrost zakresu uderza wyłącznie w <strong>datę ukończenia całości</strong>: +20% przesuwa datę P85 o 6 tygodni, +30% o 8 tygodni.
-  Zalecenie: jeśli data jest kluczowa, rozważ ograniczenie zakresu do ≈40–45 elementów, co przy obecnym tempie da szansę ukończenia przed sierpniem.
+  <svg id="mainChart"></svg>
+  <div id="chartLegend" style="display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)"></div>
 </div>
  
 <div class="tooltip" id="tooltip"></div>
  
 <script>
-const COLORS = { base:'#1d3557', c20:'#e07b39', c25:'#d44f6e', c30:'#7c3aed' };
-const SC = [
-  { key:'base', label:'Bazowy (62)', color:COLORS.base, backlog:62, p50s:15, p85s:17, p95s:17, p50d:'28 gru 2026', p85d:'25 sty 2027', p95d:'25 sty 2027', aug_p50:25, aug_p85:29, aug_p95:30 },
-  { key:'c20',  label:'+20% (74)',   color:COLORS.c20,  backlog:74, p50s:18, p85s:20, p95s:20, p50d:'8 lut 2027',  p85d:'8 mar 2027',  p95d:'8 mar 2027',  aug_p50:25, aug_p85:29, aug_p95:30 },
-  { key:'c25',  label:'+25% (77)',   color:COLORS.c25,  backlog:77, p50s:19, p85s:20, p95s:21, p50d:'22 lut 2027', p85d:'8 mar 2027',  p95d:'22 mar 2027', aug_p50:25, aug_p85:28, aug_p95:30 },
-  { key:'c30',  label:'+30% (80)',   color:COLORS.c30,  backlog:80, p50s:19, p85s:21, p95s:22, p50d:'22 lut 2027', p85d:'22 mar 2027', p95d:'5 kwi 2027',  aug_p50:25, aug_p85:29, aug_p95:30 },
-];
+// ── BASE DATA ─────────────────────────────────────────────────
+const TP_HIST = [5,4,4,5,6,4,2,3,2,5,6];
+const BASE_BACKLOG = 62;
+const START_DATE_STR = '2026-06-01';
  
-const SPRINT_DISTS = {
-  base: [{"sprint":11,"count":1,"cum":0.0},{"sprint":12,"count":474,"cum":0.5},{"sprint":13,"count":6205,"cum":6.7},{"sprint":14,"count":21544,"cum":28.2},{"sprint":15,"count":31742,"cum":60.0},{"sprint":16,"count":24312,"cum":84.3},{"sprint":17,"count":11471,"cum":95.7},{"sprint":18,"count":3410,"cum":99.2},{"sprint":19,"count":720,"cum":99.9},{"sprint":20,"count":105,"cum":100.0}],
-  c20:  [{"sprint":14,"count":66,"cum":0.1},{"sprint":15,"count":1597,"cum":1.7},{"sprint":16,"count":9290,"cum":11.0},{"sprint":17,"count":22757,"cum":33.7},{"sprint":18,"count":28948,"cum":62.7},{"sprint":19,"count":21957,"cum":84.6},{"sprint":20,"count":10681,"cum":95.3},{"sprint":21,"count":3607,"cum":98.9},{"sprint":22,"count":904,"cum":99.8},{"sprint":23,"count":174,"cum":100.0}],
-  c25:  [{"sprint":14,"count":4,"cum":0.0},{"sprint":15,"count":237,"cum":0.2},{"sprint":16,"count":3173,"cum":3.4},{"sprint":17,"count":13173,"cum":16.6},{"sprint":18,"count":25530,"cum":42.1},{"sprint":19,"count":27661,"cum":69.8},{"sprint":20,"count":18695,"cum":88.5},{"sprint":21,"count":8195,"cum":96.7},{"sprint":22,"count":2581,"cum":99.2},{"sprint":23,"count":615,"cum":99.9}],
-  c30:  [{"sprint":15,"count":19,"cum":0.0},{"sprint":16,"count":689,"cum":0.7},{"sprint":17,"count":5517,"cum":6.2},{"sprint":18,"count":17003,"cum":23.2},{"sprint":19,"count":27090,"cum":50.3},{"sprint":20,"count":25246,"cum":75.6},{"sprint":21,"count":15587,"cum":91.2},{"sprint":22,"count":6428,"cum":97.6},{"sprint":23,"count":1884,"cum":99.5},{"sprint":24,"count":446,"cum":99.9}],
+// Pre-computed results (from Python Monte Carlo)
+const PRECOMPUTED = {
+  62:  { p50s:15, p85s:17, p95s:17, aug_p50:25, aug_p85:29, aug_p95:30 },
+  74:  { p50s:18, p85s:20, p95s:20, aug_p50:25, aug_p85:29, aug_p95:30 },
+  77:  { p50s:19, p85s:20, p95s:21, aug_p50:25, aug_p85:28, aug_p95:30 },
+  80:  { p50s:19, p85s:21, p95s:22, aug_p50:25, aug_p85:29, aug_p95:30 },
 };
  
+// Fast JS Monte Carlo (10k simulations for custom scenarios)
+function runMonteCarlo(backlog, nSim=10000) {
+  const tp = TP_HIST;
+  const completion = new Array(nSim);
+  const augItems   = new Array(nSim);
+  const AUG_SPRINTS = 6;
+ 
+  for (let i=0; i<nSim; i++) {
+    let done=0, s=0;
+    while (done < backlog) { s++; done += tp[Math.floor(Math.random()*tp.length)]; }
+    completion[i] = s;
+    let aug=0;
+    for (let j=0; j<AUG_SPRINTS; j++) aug += tp[Math.floor(Math.random()*tp.length)];
+    augItems[i] = Math.min(aug, backlog);
+  }
+  completion.sort((a,b)=>a-b);
+  augItems.sort((a,b)=>a-b);
+  const p = (arr, pct) => arr[Math.floor(pct/100*(arr.length-1))];
+  return {
+    p50s: p(completion,50), p85s: p(completion,85), p95s: p(completion,95),
+    aug_p50: p(augItems,50), aug_p85: p(augItems,85), aug_p95: p(augItems,95),
+  };
+}
+ 
+function getResults(backlog) {
+  if (PRECOMPUTED[backlog]) return PRECOMPUTED[backlog];
+  return runMonteCarlo(backlog);
+}
+ 
+function sprintToDate(n, startStr) {
+  const d = new Date(startStr);
+  d.setDate(d.getDate() + n*14);
+  const months = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+ 
+// ── SCENARIOS STATE ───────────────────────────────────────────
+let scenarios = [
+  { id:1, name:'Bazowy (62)',  backlog:62, growth:0,   color:'#1a2e44', visible:true },
+  { id:2, name:'+20% (74)',    backlog:74, growth:20,  color:'#c0632a', visible:true },
+  { id:3, name:'+25% (77)',    backlog:77, growth:25,  color:'#b83460', visible:true },
+  { id:4, name:'+30% (80)',    backlog:80, growth:30,  color:'#5b34b8', visible:true },
+];
+let nextId = 5;
+ 
+let activePct   = { 50:true, 85:true, 95:true };
+let activeView  = 'completion'; // 'completion' | 'august' | 'both'
+let startDate   = START_DATE_STR;
+let horizonMonths = null; // null = all
+ 
+const PCOLORS = { 50:'#0e87d4', 85:'#d4870e', 95:'#d43c0e' };
+const PLABELS = { 50:'P50', 85:'P85', 95:'P95' };
+ 
+// ── TOOLTIP ───────────────────────────────────────────────────
 const tt = document.getElementById('tooltip');
-function showTT(ev,html){tt.innerHTML=html;tt.style.opacity='1';moveTT(ev);}
-function moveTT(ev){let x=ev.clientX+14,y=ev.clientY-10;if(x+220>window.innerWidth)x=ev.clientX-230;tt.style.left=x+'px';tt.style.top=y+'px';}
-function hideTT(){tt.style.opacity='0';}
+function showTT(ev, html) { tt.innerHTML=html; tt.style.opacity='1'; moveTT(ev); }
+function moveTT(ev) {
+  let x=ev.clientX+14, y=ev.clientY-10;
+  if (x+230>window.innerWidth) x=ev.clientX-240;
+  tt.style.left=x+'px'; tt.style.top=y+'px';
+}
+function hideTT() { tt.style.opacity='0'; }
  
-// ── SPRINT COMPARISON GROUPED BAR ─────────────────────────────
-(function(){
-  const el=document.getElementById('sprintCompChart');
-  const W=el.parentElement.clientWidth-40, H=220;
-  const m={top:14,right:20,bottom:40,left:46};
-  const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
-  const svg=d3.select(el).attr('width',W).attr('height',H);
-  const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+// ── RENDER ALL ────────────────────────────────────────────────
+function renderAll() {
+  renderScenarioPills();
+  renderStats();
+  renderChart();
+  renderScenarioTable();
+}
  
-  const pcts=['P50','P85','P95'];
-  const vals=[
-    [15,17,17],
-    [18,20,20],
-    [19,20,21],
-    [19,21,22],
+// ── SCENARIO PILLS ────────────────────────────────────────────
+function renderScenarioPills() {
+  const row = document.getElementById('scenarioRow');
+  row.innerHTML = '';
+  scenarios.forEach(sc => {
+    const pill = document.createElement('div');
+    pill.className = 'sc-pill' + (sc.visible ? ' active' : ' dimmed');
+    pill.innerHTML = `<div class="sc-swatch" style="background:${sc.color}"></div>
+      <div><div class="sc-name">${sc.name}</div><div class="sc-sub">${sc.backlog} elem.${sc.growth?` · +${sc.growth}%`:''}</div></div>`;
+    pill.addEventListener('click', () => {
+      sc.visible = !sc.visible;
+      renderAll();
+    });
+    row.appendChild(pill);
+  });
+}
+ 
+// ── STATS ROW ─────────────────────────────────────────────────
+function renderStats() {
+  const row = document.getElementById('statsRow');
+  row.innerHTML = '';
+  const vis = scenarios.filter(s=>s.visible);
+  if (!vis.length) return;
+ 
+  const base = vis[0];
+  const baseR = getResults(base.backlog);
+ 
+  const statsDef = [
+    { lbl:'Scenariusze', val:vis.length, sub:'aktywne', col:'var(--text)' },
+    { lbl:'Bazowy backlog', val:BASE_BACKLOG+' el.', sub:'punkt wyjścia', col:'var(--c0)' },
+    { lbl:'P85 bazowy', val:`S${baseR.p85s}`, sub:sprintToDate(baseR.p85s, startDate), col:'#d4870e' },
+    { lbl:'Maks. backlog', val:Math.max(...vis.map(s=>s.backlog))+' el.', sub:`+${Math.max(...vis.map(s=>s.growth))}% wzrostu`, col:'#b83460' },
+    { lbl:'Maks. P85', val:`S${Math.max(...vis.map(s=>getResults(s.backlog).p85s))}`, sub:'najgorszy scenariusz', col:'#d43c0e' },
+    { lbl:'Do 31.08 P85', val:`${Math.min(...vis.map(s=>getResults(s.backlog).aug_p85))}–${Math.max(...vis.map(s=>getResults(s.backlog).aug_p85))} el.`, sub:'zakres wyników', col:'#0e87d4' },
   ];
-  const pctColors={'P50':'#2196f3','P85':'#f59e0b','P95':'#ef4444'};
  
-  const xOuter=d3.scaleBand().domain(SC.map(s=>s.label)).range([0,iW]).padding(0.28);
-  const xInner=d3.scaleBand().domain(pcts).range([0,xOuter.bandwidth()]).padding(0.1);
-  const yScale=d3.scaleLinear().domain([0,25]).range([iH,0]).nice();
+  statsDef.forEach(s => {
+    row.innerHTML += `<div class="stat-card">
+      <div class="stat-lbl">${s.lbl}</div>
+      <div class="stat-val" style="color:${s.col}">${s.val}</div>
+      <div class="stat-sub">${s.sub}</div>
+    </div>`;
+  });
+}
  
-  g.selectAll('.gl').data(yScale.ticks(5)).enter().append('line')
+// ── MAIN CHART ────────────────────────────────────────────────
+function renderChart() {
+  const el = document.getElementById('mainChart');
+  el.innerHTML = '';
+ 
+  const vis = scenarios.filter(s => s.visible);
+  if (!vis.length) return;
+ 
+  const activePcts = [50,85,95].filter(p => activePct[p]);
+  if (!activePcts.length) return;
+ 
+  const isBoth = activeView === 'both';
+  const isAug  = activeView === 'august';
+  const isComp = activeView === 'completion';
+ 
+  // Build data series
+  // Each group = one percentile row; within each group = one bar per scenario
+  // X axis: scenarios
+  // Groups of bars per scenario: one per active percentile x metric
+ 
+  const metrics = [];
+  if (!isAug)  activePcts.forEach(p => metrics.push({ type:'completion', p, key:`p${p}s`,    label:`P${p} · sprinty` }));
+  if (!isComp) activePcts.forEach(p => metrics.push({ type:'august',     p, key:`aug_p${p}`, label:`P${p} · elementy do 31.08` }));
+ 
+  const scLabels = vis.map(s => s.name);
+  const metricLabels = metrics.map(m => m.label);
+ 
+  // yMax
+  let yMax = 0;
+  vis.forEach(sc => {
+    const r = getResults(sc.backlog);
+    metrics.forEach(m => { yMax = Math.max(yMax, r[m.key]||0); });
+  });
+  yMax = Math.ceil(yMax * 1.18);
+ 
+  const W = Math.min(1040, window.innerWidth - 100);
+  const H = isBoth ? 340 : 280;
+  const m = { top: 20, right: 30, bottom: 64, left: 50 };
+  const iW = W - m.left - m.right;
+  const iH = H - m.top - m.bottom;
+ 
+  const svg = d3.select(el).attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+ 
+  // Scales
+  const xOuter = d3.scaleBand().domain(scLabels).range([0, iW]).padding(0.28);
+  const xInner = d3.scaleBand().domain(metricLabels).range([0, xOuter.bandwidth()]).padding(0.08);
+  const yScale = d3.scaleLinear().domain([0, yMax]).range([iH, 0]).nice();
+ 
+  // Grid
+  g.selectAll('.gl').data(yScale.ticks(6)).enter().append('line')
     .attr('x1',0).attr('x2',iW).attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
-    .attr('stroke','#f0ede9').attr('stroke-width',1);
+    .attr('stroke','#ede9e2').attr('stroke-width',1);
  
-  SC.forEach((sc,si)=>{
-    pcts.forEach((p,pi)=>{
-      const v=vals[si][pi];
-      const bx=xOuter(sc.label)+xInner(p);
-      const by=yScale(v), bh=iH-yScale(v);
-      g.append('rect').attr('x',bx).attr('y',by).attr('width',xInner.bandwidth()).attr('height',bh)
-        .attr('rx',3).attr('fill',pctColors[p]).attr('fill-opacity',0.85)
+  // Separator between completion / august metrics
+  if (isBoth && activePcts.length > 0) {
+    const sepIdx = activePcts.length;
+    if (sepIdx < metrics.length) {
+      const firstAug = metrics[sepIdx];
+      vis.forEach(sc => {
+        const bx = xOuter(sc.name) + xInner(firstAug.label) - 4;
+        g.append('line').attr('x1',bx).attr('x2',bx).attr('y1',0).attr('y2',iH)
+          .attr('stroke','#d0ccc6').attr('stroke-width',1).attr('stroke-dasharray','4 3');
+      });
+    }
+  }
+ 
+  // Bars
+  vis.forEach(sc => {
+    const r = getResults(sc.backlog);
+    metrics.forEach(metric => {
+      const val = r[metric.key] || 0;
+      const bx  = xOuter(sc.name) + xInner(metric.label);
+      const bw  = xInner.bandwidth();
+      const by  = yScale(val);
+      const bh  = iH - by;
+ 
+      // Bar fill: blend scenario color with percentile tint
+      const pAlpha = metric.p === 50 ? '99' : metric.p === 85 ? 'cc' : 'ff';
+      const baseCol = sc.color;
+ 
+      // Pattern: completion = solid, august = striped lighter
+      const isAugBar = metric.type === 'august';
+ 
+      g.append('rect')
+        .attr('x', bx).attr('y', by).attr('width', bw).attr('height', bh)
+        .attr('rx', 3)
+        .attr('fill', isAugBar ? sc.color+'66' : sc.color)
+        .attr('fill-opacity', metric.p===50?0.55:metric.p===85?0.78:0.96)
+        .attr('stroke', isAugBar ? sc.color+'99' : 'none')
+        .attr('stroke-width', isAugBar ? 1.5 : 0)
+        .attr('stroke-dasharray', isAugBar ? '3 2' : 'none')
         .style('cursor','pointer')
-        .on('mousemove',(ev)=>showTT(ev,`${sc.label} · ${p} = ${v} sprintów`))
-        .on('mouseout',hideTT);
-      if(bh>14){
-        g.append('text').attr('x',bx+xInner.bandwidth()/2).attr('y',by-4)
-          .attr('text-anchor','middle').attr('fill',pctColors[p])
-          .attr('font-size','10px').attr('font-weight','700').attr('font-family','DM Mono, monospace').text(v);
+        .on('mousemove', ev => {
+          const unit = metric.type==='completion' ? `sprintów (${sprintToDate(val, startDate)})` : `elementów do 31.08`;
+          showTT(ev, `${sc.name}\nP${metric.p} → ${val} ${unit}`);
+        })
+        .on('mouseout', hideTT);
+ 
+      // Value label
+      if (bh > 16) {
+        g.append('text')
+          .attr('x', bx + bw/2).attr('y', by - 4)
+          .attr('text-anchor','middle')
+          .attr('fill', sc.color)
+          .attr('font-size','10px').attr('font-weight','700')
+          .attr('font-family','JetBrains Mono, monospace')
+          .text(val);
       }
     });
   });
  
+  // Axes
   g.append('g').attr('transform',`translate(0,${iH})`)
     .call(d3.axisBottom(xOuter).tickSize(0))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('text').attr('fill','#7a7470').attr('font-size','11px').attr('dy','1.2em');});
+    .call(ax => {
+      ax.select('.domain').attr('stroke','#d8d3cc');
+      ax.selectAll('text').attr('fill','#6b6560').attr('font-size','11px').attr('dy','1.3em')
+        .attr('font-family','Syne, sans-serif').attr('font-weight','600');
+    });
  
-  g.append('g').call(d3.axisLeft(yScale).ticks(5).tickFormat(d=>'S'+d))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
+  const yFmt = activeView==='august' ? d => d+' el.' : d => d>0?'S'+d:'';
+  g.append('g')
+    .call(d3.axisLeft(yScale).ticks(6).tickFormat(yFmt))
+    .call(ax => {
+      ax.select('.domain').attr('stroke','#d8d3cc');
+      ax.selectAll('line').remove();
+      ax.selectAll('text').attr('fill','#8a8278').attr('font-size','10px').attr('font-family','JetBrains Mono, monospace');
+    });
  
-  // P legend
-  const lx=iW-200;
-  pcts.forEach((p,i)=>{
-    g.append('rect').attr('x',lx+i*66).attr('y',-12).attr('width',12).attr('height',12).attr('rx',2).attr('fill',pctColors[p]);
-    g.append('text').attr('x',lx+i*66+15).attr('y',-2).attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace').text(p);
-  });
-})();
- 
-// ── DATE CHART (P85 horizontal bar) ──────────────────────────
-(function(){
-  const el=document.getElementById('dateChart');
-  const W=el.parentElement.clientWidth-40, H=180;
-  const m={top:10,right:20,bottom:14,left:14};
-  const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
-  const svg=d3.select(el).attr('width',W).attr('height',H);
-  const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
- 
-  const startMs=new Date('2026-06-01').getTime();
-  const dates={base:new Date('2027-01-25'),c20:new Date('2027-03-08'),c25:new Date('2027-03-08'),c30:new Date('2027-03-22')};
-  const maxMs=new Date('2027-05-01').getTime();
- 
-  const yBand=d3.scaleBand().domain(SC.map(s=>s.key)).range([0,iH]).padding(0.3);
-  const xScale=d3.scaleLinear().domain([startMs,maxMs]).range([80,iW]);
- 
-  SC.forEach(sc=>{
-    const d=dates[sc.key];
-    const barW=xScale(d.getTime())-xScale(startMs);
-    const y=yBand(sc.key);
-    const h=yBand.bandwidth();
- 
-    // background track
-    g.append('rect').attr('x',80).attr('y',y).attr('width',iW-80).attr('height',h)
-      .attr('rx',4).attr('fill','#f7f5f2');
- 
-    // bar
-    g.append('rect').attr('x',80).attr('y',y).attr('width',barW).attr('height',h)
-      .attr('rx',4).attr('fill',sc.color).attr('fill-opacity',0.85);
- 
-    // label left
-    g.append('text').attr('x',76).attr('y',y+h/2+4).attr('text-anchor','end')
-      .attr('fill','#7a7470').attr('font-size','10px').attr('font-weight','600').text(sc.label);
- 
-    // date label
-    const months=['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
-    const dateLabel=`${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-    g.append('text').attr('x',80+barW+5).attr('y',y+h/2+4)
-      .attr('fill',sc.color).attr('font-size','10px').attr('font-weight','700')
-      .attr('font-family','DM Mono, monospace').text(dateLabel);
-  });
- 
-  // month gridlines
-  const refDates=[new Date('2026-09-01'),new Date('2026-12-01'),new Date('2027-03-01')];
-  refDates.forEach(d=>{
-    const x=xScale(d.getTime());
-    g.append('line').attr('x1',x).attr('x2',x).attr('y1',0).attr('y2',iH)
-      .attr('stroke','#e8e4de').attr('stroke-width',1).attr('stroke-dasharray','3 3');
-    const months=['','','sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
-    g.append('text').attr('x',x+3).attr('y',iH+12).attr('fill','#b0aba5').attr('font-size','9px')
-      .attr('font-family','DM Mono, monospace').text(`${months[d.getMonth()]} ${d.getFullYear()}`);
-  });
-})();
- 
-// ── CUMULATIVE COMPARISON ────────────────────────────────────
-(function(){
-  const el=document.getElementById('cumCompChart');
-  const W=el.parentElement.clientWidth-40, H=200;
-  const m={top:14,right:50,bottom:36,left:44};
-  const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
-  const svg=d3.select(el).attr('width',W).attr('height',H);
-  const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
- 
-  const xScale=d3.scaleLinear().domain([10,26]).range([0,iW]);
-  const yScale=d3.scaleLinear().domain([0,100]).range([iH,0]);
- 
-  g.selectAll('.gl').data([25,50,75,85,95]).enter().append('line')
-    .attr('x1',0).attr('x2',iW).attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
-    .attr('stroke','#f0ede9').attr('stroke-width',1);
- 
-  // 85% reference line
-  g.append('line').attr('x1',0).attr('x2',iW).attr('y1',yScale(85)).attr('y2',yScale(85))
-    .attr('stroke','#f59e0b').attr('stroke-width',1.5).attr('stroke-dasharray','5 3').attr('opacity',0.7);
-  g.append('text').attr('x',iW+2).attr('y',yScale(85)+4).attr('fill','#f59e0b')
-    .attr('font-size','9px').attr('font-weight','700').attr('font-family','DM Mono, monospace').text('P85');
- 
-  Object.entries(SPRINT_DISTS).forEach(([key,dist])=>{
-    const sc=SC.find(s=>s.key===key);
-    g.append('path').datum(dist)
-      .attr('fill','none').attr('stroke',sc.color).attr('stroke-width',2.2).attr('opacity',0.9)
-      .attr('d',d3.line().x(d=>xScale(d.sprint)).y(d=>yScale(d.cum)).curve(d3.curveMonotoneX));
-    // last point label
-    const last=dist[dist.length-2];
-    g.append('circle').attr('cx',xScale(last.sprint)).attr('cy',yScale(last.cum))
-      .attr('r',4).attr('fill',sc.color).attr('stroke','#fff').attr('stroke-width',1.5);
-  });
- 
-  // Legend
-  SC.forEach((sc,i)=>{
-    g.append('line').attr('x1',0).attr('x2',18).attr('y1',6+i*14).attr('y2',6+i*14)
-      .attr('stroke',sc.color).attr('stroke-width',2.5);
-    g.append('text').attr('x',21).attr('y',10+i*14).attr('fill',sc.color)
-      .attr('font-size','9px').attr('font-weight','600').text(sc.label);
-  });
- 
-  g.append('g').attr('transform',`translate(0,${iH})`)
-    .call(d3.axisBottom(xScale).ticks(8).tickFormat(d=>`S${d}`))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
-  g.append('g').call(d3.axisLeft(yScale).ticks(5).tickFormat(d=>d+'%'))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
-})();
- 
-// ── AUG COMPARISON GROUPED BAR ────────────────────────────────
-(function(){
-  const el=document.getElementById('augCompChart');
-  const W=el.parentElement.clientWidth-40, H=200;
-  const m={top:14,right:20,bottom:40,left:46};
-  const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
-  const svg=d3.select(el).attr('width',W).attr('height',H);
-  const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
- 
-  const pcts=['P50','P85','P95'];
-  const pctColors={'P50':'#2196f3','P85':'#f59e0b','P95':'#ef4444'};
-  const augVals=[[25,29,30],[25,29,30],[25,28,30],[25,29,30]];
- 
-  const xOuter=d3.scaleBand().domain(SC.map(s=>s.label)).range([0,iW]).padding(0.28);
-  const xInner=d3.scaleBand().domain(pcts).range([0,xOuter.bandwidth()]).padding(0.1);
-  const yScale=d3.scaleLinear().domain([0,40]).range([iH,0]).nice();
- 
-  // Backlog reference line
-  g.append('line').attr('x1',0).attr('x2',iW).attr('y1',yScale(0)).attr('y2',yScale(0))
-    .attr('stroke','#e8e4de').attr('stroke-width',1);
- 
-  g.selectAll('.gl').data([10,20,30]).enter().append('line')
-    .attr('x1',0).attr('x2',iW).attr('y1',d=>yScale(d)).attr('y2',d=>yScale(d))
-    .attr('stroke','#f0ede9').attr('stroke-width',1);
- 
-  SC.forEach((sc,si)=>{
-    pcts.forEach((p,pi)=>{
-      const v=augVals[si][pi];
-      const bx=xOuter(sc.label)+xInner(p);
-      const by=yScale(v), bh=iH-yScale(v);
-      g.append('rect').attr('x',bx).attr('y',by).attr('width',xInner.bandwidth()).attr('height',bh)
-        .attr('rx',3).attr('fill',pctColors[p]).attr('fill-opacity',0.82)
-        .style('cursor','pointer')
-        .on('mousemove',(ev)=>showTT(ev,`${sc.label} · ${p} = ${v} elementów do 31 sie`))
-        .on('mouseout',hideTT);
-      g.append('text').attr('x',bx+xInner.bandwidth()/2).attr('y',by-4)
-        .attr('text-anchor','middle').attr('fill',pctColors[p])
-        .attr('font-size','10px').attr('font-weight','700').attr('font-family','DM Mono, monospace').text(v);
+  // Inner axis labels (metric names) under bars — small rotation
+  vis.forEach(sc => {
+    metrics.forEach(metric => {
+      const bx = xOuter(sc.name) + xInner(metric.label) + xInner.bandwidth()/2;
+      g.append('text')
+        .attr('transform', `translate(${bx},${iH+10}) rotate(-35)`)
+        .attr('text-anchor','end')
+        .attr('fill','#a09890').attr('font-size','8px').attr('font-family','JetBrains Mono, monospace')
+        .text(`P${metric.p}${metric.type==='august'?' aug':''}`)
     });
   });
  
-  // Note: all scenarios deliver 0 full backlog
-  g.append('rect').attr('x',0).attr('y',0).attr('width',iW).attr('height',4).attr('fill','#fde8ed').attr('opacity',0.6);
-  g.append('text').attr('x',4).attr('y',13).attr('fill','#be2b50').attr('font-size','9px').attr('font-weight','700').text('⛔  Żaden scenariusz nie realizuje pełnego backlogu do 31.08');
- 
-  g.append('g').attr('transform',`translate(0,${iH})`)
-    .call(d3.axisBottom(xOuter).tickSize(0))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('text').attr('fill','#7a7470').attr('font-size','11px').attr('dy','1.2em');});
-  g.append('g').call(d3.axisLeft(yScale).ticks(4).tickFormat(d=>d+' el.'))
-    .call(ax=>{ax.select('.domain').attr('stroke','#e8e4de');ax.selectAll('line').remove();ax.selectAll('text').attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace');});
- 
-  const lx=iW-200;
-  pcts.forEach((p,i)=>{
-    g.append('rect').attr('x',lx+i*66).attr('y',-12).attr('width',12).attr('height',12).attr('rx',2).attr('fill',pctColors[p]);
-    g.append('text').attr('x',lx+i*66+15).attr('y',-2).attr('fill','#7a7470').attr('font-size','10px').attr('font-family','DM Mono, monospace').text(p);
+  // Legend
+  const legEl = document.getElementById('chartLegend');
+  legEl.innerHTML = '';
+  vis.forEach(sc => {
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:0.74rem;color:var(--muted)';
+    item.innerHTML = `<div style="width:10px;height:10px;border-radius:2px;background:${sc.color}"></div><span style="font-family:Syne,sans-serif;font-weight:600;color:var(--text)">${sc.name}</span> <span>${sc.backlog} el.</span>`;
+    legEl.appendChild(item);
   });
-})();
+ 
+  activePcts.forEach(p => {
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:0.74rem;color:var(--muted);margin-left:8px';
+    item.innerHTML = `<div style="width:10px;height:10px;border-radius:2px;background:${PCOLORS[p]};opacity:0.3;border:1px dashed ${PCOLORS[p]}"></div><span style="font-family:JetBrains Mono,monospace;font-size:0.7rem">P${p} · jasność słupka</span>`;
+    legEl.appendChild(item);
+  });
+ 
+  // subtitle update
+  document.getElementById('chartSubtitle').textContent =
+    activeView==='completion' ? 'Sprinty do ukończenia backlogu · P50/P85/P95 per scenariusz' :
+    activeView==='august'     ? 'Elementy dostarczone do 31 sierpnia 2026 · P50/P85/P95' :
+    'Lewe słupki = sprinty ukończenia · Prawe = elementy do 31.08';
+}
+ 
+// ── SCENARIO TABLE ────────────────────────────────────────────
+function renderScenarioTable() {
+  const tbody = document.getElementById('scTableBody');
+  tbody.innerHTML = '';
+  scenarios.forEach(sc => {
+    const r = getResults(sc.backlog);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="color-swatch-sm" style="background:${sc.color}"></span><strong>${sc.name}</strong></td>
+      <td style="font-family:var(--mono)">${sc.backlog}</td>
+      <td style="font-family:var(--mono)">${sc.growth ? '+'+sc.growth+'%' : '—'}</td>
+      <td style="font-family:var(--mono)">S${r.p50s}</td>
+      <td style="font-family:var(--mono)">S${r.p85s}</td>
+      <td style="font-family:var(--mono)">S${r.p95s}</td>
+      <td>${sc.id<=4?'':'<button class="del-btn" title="Usuń">✕</button>'}</td>`;
+    if (sc.id > 4) {
+      tr.querySelector('.del-btn').addEventListener('click', () => {
+        scenarios = scenarios.filter(s => s.id !== sc.id);
+        renderAll();
+      });
+    }
+    tbody.appendChild(tr);
+  });
+}
+ 
+// ── CONTROLS ─────────────────────────────────────────────────
+ 
+// Percentile toggles
+document.querySelectorAll('.pct-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = +btn.dataset.p;
+    activePct[p] = !activePct[p];
+    btn.classList.toggle('on', activePct[p]);
+    renderChart();
+  });
+});
+ 
+// View filter chips
+document.querySelectorAll('[data-view]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('[data-view]').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeView = chip.dataset.view;
+    renderChart();
+  });
+});
+ 
+// Sprint start chips
+document.querySelectorAll('[data-sprint]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('[data-sprint]').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const s = +chip.dataset.sprint - 1;
+    const d = new Date('2026-06-01');
+    d.setDate(d.getDate() + s*14);
+    startDate = d.toISOString().slice(0,10);
+    document.getElementById('startDateInput').value = startDate;
+    renderChart(); renderStats();
+  });
+});
+ 
+document.getElementById('startDateInput').addEventListener('change', e => {
+  startDate = e.target.value;
+  document.querySelectorAll('[data-sprint]').forEach(c => c.classList.remove('active'));
+  renderChart(); renderStats();
+});
+ 
+// Horizon chips
+document.querySelectorAll('[data-horizon]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('[data-horizon]').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    horizonMonths = chip.dataset.horizon === 'all' ? null : chip.dataset.horizon === 'month' ? 1 : 3;
+    renderChart();
+  });
+});
+ 
+// Add panel
+document.getElementById('addBtn').addEventListener('click', () => {
+  document.getElementById('addPanel').classList.toggle('open');
+  renderScenarioTable();
+});
+document.getElementById('closePanelBtn').addEventListener('click', () => {
+  document.getElementById('addPanel').classList.remove('open');
+});
+ 
+// Growth auto-calc
+document.getElementById('fGrowth').addEventListener('input', e => {
+  const g = parseFloat(e.target.value);
+  if (!isNaN(g) && g >= 0) {
+    document.getElementById('fBacklog').value = Math.round(BASE_BACKLOG * (1 + g/100));
+  }
+});
+document.getElementById('fBacklog').addEventListener('input', e => {
+  const b = parseInt(e.target.value);
+  if (!isNaN(b) && b > 0) {
+    const g = ((b - BASE_BACKLOG) / BASE_BACKLOG * 100).toFixed(0);
+    document.getElementById('fGrowth').value = g;
+  }
+});
+ 
+document.getElementById('fSubmit').addEventListener('click', () => {
+  const name    = document.getElementById('fName').value.trim();
+  const backlog = parseInt(document.getElementById('fBacklog').value);
+  const growth  = parseFloat(document.getElementById('fGrowth').value) || 0;
+  const color   = document.getElementById('fColor').value;
+  const status  = document.getElementById('addStatus');
+ 
+  if (!name)                 { showStatus('err', 'Podaj nazwę scenariusza.'); return; }
+  if (!backlog || backlog<1) { showStatus('err', 'Podaj liczbę elementów (>0).'); return; }
+ 
+  const sc = { id: nextId++, name, backlog, growth, color, visible: true };
+  scenarios.push(sc);
+ 
+  // Clear form
+  document.getElementById('fName').value = '';
+  document.getElementById('fBacklog').value = '';
+  document.getElementById('fGrowth').value = '';
+ 
+  showStatus('ok', `✓ Dodano scenariusz "${name}" (${backlog} elementów). Przeliczam...`);
+  setTimeout(() => { renderAll(); }, 100);
+ 
+  function showStatus(type, msg) { status.textContent=msg; status.className='add-status '+type; }
+});
+ 
+document.getElementById('runBtn').addEventListener('click', () => {
+  // Force recompute cached
+  renderAll();
+  document.getElementById('runBtn').textContent = '✓ Przeliczono';
+  setTimeout(()=>{ document.getElementById('runBtn').textContent = '⟳ Przelicz'; }, 1500);
+});
+ 
+// ── INIT ──────────────────────────────────────────────────────
+renderAll();
 </script>
 </body>
 </html>
